@@ -1,0 +1,42 @@
+{
+  "ml": [
+    {"name": "Weekly Pass x1", "modal": 30597},
+    {"name": "Weekly Pass x2", "modal": 61193},
+    {"name": "Weekly Pass x3", "modal": 91789},
+    {"name": "Weekly Pass x4", "modal": 122385},
+    {"name": "Weekly Pass x5", "modal": 152982},
+    {"name": "50 + 50 Bonus", "modal": 15454},
+    {"name": "150 + 150 Bonus", "modal": 46214},
+    {"name": "250 + 250 Bonus", "modal": 77125},
+    {"name": "500 + 500 Bonus", "modal": 155127},
+    {"name": "5 Diamonds", "modal": 1615},
+    {"name": "10 Diamonds", "modal": 3146},
+    {"name": "28 Diamonds", "modal": 8617},
+    {"name": "44 Diamonds", "modal": 12866},
+    {"name": "59 Diamonds", "modal": 17028},
+    {"name": "85 Diamonds", "modal": 24594},
+    {"name": "170 Diamonds", "modal": 48761},
+    {"name": "240 Diamonds", "modal": 68902},
+    {"name": "296 Diamonds", "modal": 85310},
+    {"name": "408 Diamonds", "modal": 118124},
+    {"name": "568 Diamonds", "modal": 161184},
+    {"name": "2010 Diamonds", "modal": 540428},
+    {"name": "4830 Diamonds", "modal": 1288885}
+  ],
+  "pubg": [
+    {"name": "60 UC", "modal": 16376},
+    {"name": "325 (300+25) UC", "modal": 82243},
+    {"name": "660 (600+60) UC", "modal": 164485},
+    {"name": "1105 (1020+85) UC", "modal": 279479},
+    {"name": "1500 (1380+120) UC", "modal": 378096},
+    {"name": "1800 (1500+300) UC", "modal": 411581}
+  ],
+  "roblox": [
+    {"name": "500 Robux", "modal": 75000},
+    {"name": "1000 Robux", "modal": 150000},
+    {"name": "1500 Robux", "modal": 225000},
+    {"name": "2000 Robux", "modal": 300000},
+    {"name": "5000 Robux", "modal": 750000},
+    {"name": "10000 Robux", "modal": 1500000}
+  ]
+}
