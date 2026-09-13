@@ -56,7 +56,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <body>
 <div class="main">
 <div class="header"><div class="header-left"><img src="./Logo.jpg"><b>RFK STORE</b></div><button id="theme-toggle">🌙</button></div>
-
 <div id="home">
 <div class="banner"><h2 style="margin:0">Top-Up Game Murah & Cepat</h2><p style="margin:4px 0 0;font-size:12px">Proses Instan - Harga Terbaik</p></div>
 <div class="jam-big"><b>⏰ JAM OPERASIONAL</b><span>08:00 - 22:00 WIB</span><small style="color:#888">Fast Respon di jam kerja!</small></div>
@@ -67,7 +66,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="kcard" onclick="op('rb')"><img src="./roblox.jpg"><span>Roblox</span></div>
 <div class="kcard" onclick="op('vl')"><img src="./Valorant.jpg"><span>Valorant</span></div>
 </div>
-
 <div style="padding:0 12px"><b>Produk Paling Digemari</b></div>
 <div class="pcard">
 <div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100)','33657')"><span>Weekly Pass - ML</span><b>Rp 33.657</b></div>
@@ -75,12 +73,9 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux - Roblox</span><b>Rp 82.500</b></div>
 <div class="price" onclick="beliValo('Valorant','475 Points','55300')"><span>475 Points - Valorant</span><b>Rp 55.300</b></div>
 </div>
-
 <div style="padding:0 12px"><b>Metode Pembayaran</b></div>
 <div class="pcard" style="text-align:center">Via QRIS atau BCA</div>
-
 </div>
-
 <div id="ml" class="hidden content-pad">
 <h3>MOBILE LEGENDS</h3>
 <div class="tit">⚡Spesial item ⚡</div>
@@ -109,7 +104,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beliML('ML','2010 Diamonds ( 1708 + 302 Bonus )','594471')"><span>2010 Diamonds ( 1708 + 302 Bonus )</span><b>Rp 594.471</b></div>
 <div class="price" onclick="beliML('ML','4830 Diamonds ( 4003 + 827 Bonus )','1417774')"><span>4830 Diamonds ( 4003 + 827 Bonus )</span><b>Rp 1.417.774</b></div>
 </div>
-
 <div id="pb" class="hidden content-pad">
 <h3>PUBG MOBILE</h3>
 <div class="price" onclick="beliPUBG('PUBG','60 UC','18014')"><span>60 UC</span><b>Rp 18.014</b></div>
@@ -119,7 +113,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beliPUBG('PUBG','1500 (1380+120) UC','415906')"><span>1500 (1380+120) UC</span><b>Rp 415.906</b></div>
 <div class="price" onclick="beliPUBG('PUBG','1800 (1500+300) UC','452739')"><span>1800 (1500+300) UC</span><b>Rp 452.739</b></div>
 </div>
-
 <div id="rb" class="hidden content-pad">
 <h3>ROBLOX (VILOG)</h3>
 <div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux</span><b>Rp 82.500</b></div>
@@ -129,7 +122,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beliRoblox('5000 Robux','825000')"><span>5000 Robux</span><b>Rp 825.000</b></div>
 <div class="price" onclick="beliRoblox('10.000 Robux','1650000')"><span>10.000 Robux</span><b>Rp 1.650.000</b></div>
 </div>
-
 <div id="vl" class="hidden content-pad">
 <h3>Valorant</h3>
 <div class="price" onclick="beliValo('Valorant','475 Points','55300')"><span>475 Points</span><b>Rp 55.300</b></div>
@@ -147,9 +139,7 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beliValo('Valorant','13050 Points','1306900')"><span>13050 Points</span><b>Rp 1.306.900</b></div>
 <div class="price" onclick="beliValo('Valorant','20000 Points','2022100')"><span>20000 Points</span><b>Rp 2.022.100</b></div>
 </div>
-
 <div id="form" class="hidden content-pad"><h3 id="fjudul"></h3><div class="pcard" id="formContent"></div></div>
-
 <div id="bayar" class="hidden content-pad">
 <h3>Konfirmasi Pesanan</h3>
 <div class="pcard" id="bayarInfo"></div>
@@ -160,34 +150,28 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button>
 </div>
 </div>
-
 <div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan</h3><div id="listPesanan"></div></div>
 <div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai</h3><div id="listRiwayat"></div></div>
-
 <div id="ulasan" class="hidden content-pad">
 <h3>⭐ Ulasan Pelanggan</h3>
 <div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div>
 <div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div>
 <div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div>
 </div>
-
 <div id="support" class="hidden content-pad">
 <h3>Support</h3>
 <div class="pcard support-card"><div style="font-size:42px">💬</div><b>Butuh Bantuan?</b><br><small style="color:#888">Admin Online 08:00 - 22:00 WIB</small><br><br><a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a><a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a></div>
 </div>
 </div>
-
 <div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-ulasan" onclick="showTab('ulasan')">Ulasan</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-support" onclick="showTab('support')">Support</div></div>
-
 <script>
 let tmp={};let lastGame='home';let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
 const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='RFK042326'){localStorage.setItem('rfk-admin','true');alert('Mode Admin Aktif RFK042326');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
-function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;}
+function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);}
 function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
-function showTab(t){hideAll();let id=t==='home'?'home':t;document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');}
+function showTab(t){hideAll();let id=t==='home'?'home':t;document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');}
 function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');}
 function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');}}
-
 function beliML(g,i,p){
 tmp={game:g,item:i,price:p,type:'ml'};
 document.getElementById('fjudul').innerText=g+' - '+i;
@@ -283,7 +267,16 @@ if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating'
 }catch(e){}},1500);
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
-window.addEventListener('DOMContentLoaded',()=>{let h=location.hash.replace('#','')||localStorage.getItem('rfk-last')||'home';if(document.getElementById(h)){hideAll();document.getElementById(h).classList.remove('hidden');if(h!=='home')lastGame=h;showTab(h);}});
+window.addEventListener('DOMContentLoaded',()=>{
+let last = sessionStorage.getItem('rfk-last');
+if(last && document.getElementById(last)){
+hideAll();document.getElementById(last).classList.remove('hidden');
+if(last!=='home'){lastGame=last;}
+showTab(last);
+} else {
+showTab('home');
+}
+});
 </script>
 </body>
 </html>
