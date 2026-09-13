@@ -218,17 +218,19 @@ window.addEventListener('hashchange', () => {
   op(h);
 });
 
-  // DARK MODE - JANGAN DIHAPUS LAGI!
+// DARK MODE - JANGAN DIHAPUS LAGI!
 const toggle=document.getElementById('theme-toggle');
-const saved=localStorage.getItem('rfk-theme')||'light';
-document.documentElement.setAttribute('data-theme',saved);
-toggle.textContent=saved==='dark'?'☀️':'🌙';
-toggle.onclick=()=>{
-  const cur=document.documentElement.getAttribute('data-theme');
-  const next=cur==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('rfk-theme',next);
-  toggle.textContent=next==='dark'?'☀️':'🌙';
+if(toggle){
+  const saved=localStorage.getItem('rfk-theme')||'light';
+  document.documentElement.setAttribute('data-theme',saved);
+  toggle.textContent=saved==='dark'?'☀️':'🌙';
+  toggle.onclick=()=>{
+    const cur=document.documentElement.getAttribute('data-theme');
+    const next=cur==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('rfk-theme',next);
+    toggle.textContent=next==='dark'?'☀️':'🌙';
+  };
 }
 </script>
 </body>
