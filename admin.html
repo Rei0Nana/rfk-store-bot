@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RFK STORE - ADMIN PANEL</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px}
+.card{background:#231c28;border-radius:16px;padding:14px;margin:10px 0;border:1px solid #3a2d3f;box-shadow:0 4px 12px #00000080}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;background:#141018;color:white;margin:6px 0}
+.btn{width:100%;padding:12px;border:none;border-radius:12px;font-weight:800;cursor:pointer;margin-top:8px}
+.btn-pink{background:#e84393;color:white}
+.btn-green{background:#00c853;color:white}
+.btn-red{background:#ff3b3b;color:white}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}
+.berjalan{background:orange}.selesai{background:#00c853}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat{background:#231c28;padding:12px;border-radius:12px;text-align:center;border:1px solid #3a2d3f}
+.stat b{font-size:22px;display:block;color:#ff8fab}
+.hidden{display:none}
+</style>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy};
+</script>
+</head>
+<body>
+<div id="login">
+<h2>🔐 RFK STORE ADMIN</h2>
+<div class="card">
+<input id="pass" type="password" placeholder="Password admin">
+<button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
+</div>
+</div>
+
+<div id="dash" class="hidden">
+<h2>📊 Dashboard RFK STORE</h2>
+<div class="grid">
+<div class="stat"><b id="totalOrder">0</b><small>Total Order</small></div>
+<div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
+<div class="stat"><b id="totalSelesai">0</b><small>Selesai</small></div>
+</div>
+<div class="card">
+<input id="search" placeholder="🔍 Cari ID / Game / Username..." oninput="filter()">
+</div>
+<h3>🔥 Pesanan Berjalan</h3>
+<div id="listJalan"></div>
+<h3>✅ Riwayat Selesai</h3>
+<div id="listSelesai"></div>
+<button class="btn btn-red" onclick="logout()">Logout Admin</button>
+</div>
+
+<script>
+let allData=[];
+function login(){
+  if(document.getElementById('pass').value==='RFK042326'){
+    localStorage.setItem('rfk-admin','true');
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    load();
+  }else alert('Password salah!');
+}
+if(localStorage.getItem('rfk-admin')==='true'){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  setTimeout(load,1000);
+}
+function logout(){localStorage.removeItem('rfk-admin');location.reload();}
+function load(){
+  const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
+  window.fs.onSnapshot(q,s=>{
+    allData=[];
+    s.forEach(d=>{allData.push({id:d.id,...d.data()})});
+    render(allData);
+  });
+}
+function render(data){
+  let jalan='',selesai='';let cJ=0,cS=0;
+  data.forEach(o=>{
+    let t=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID'):'-';
+    let card=`<div class="card">
+    <b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br>
+    <small style="color:#888">${t}</small><br><br>
+    ID Game: <b>${o.id1||'-'}</b> ${o.id2||''}<br>
+    ${o.id3?`Backup/Pass: <b style="color:#ff8fab">${o.id3} ${o.extra||''}</b><br>`:''}
+    Harga: <b>Rp ${o.price}</b><br>
+    Device: <small>${o.deviceId||'-'}</small><br><br>
+    ${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan Pesanan</button>`:''}
+    <button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button>
+    <a href="https://wa.me/6285333403905?text=Halo%20kak%20pesanan%20${o.game}%20${o.item}%20ID%20${o.id1}%20sudah%20selesai%20ya" target="_blank" style="display:block;text-align:center;margin-top:8px;color:#25D366;text-decoration:none;font-weight:700">💬 Chat WA Pembeli</a>
+    </div>`;
+    if(o.status==='berjalan'){jalan+=card;cJ++;}else{selesai+=card;cS++;}
+  });
+  document.getElementById('listJalan').innerHTML=jalan||'<div class=card>Belum ada pesanan berjalan</div>';
+  document.getElementById('listSelesai').innerHTML=selesai||'<div class=card>Belum ada riwayat</div>';
+  document.getElementById('totalOrder').innerText=data.length;
+  document.getElementById('totalJalan').innerText=cJ;
+  document.getElementById('totalSelesai').innerText=cS;
+}
+function filter(){
+  let k=document.getElementById('search').value.toLowerCase();
+  let f=allData.filter(o=> JSON.stringify(o).toLowerCase().includes(k));
+  render(f);
+}
+async function selesai(id){if(confirm('Selesaikan order ini?'))await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
+async function hapus(id){if(confirm('Hapus permanen?'))await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
+</script>
+</body>
+</html>
