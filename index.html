@@ -97,10 +97,26 @@ window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy};
 <div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-support" onclick="showTab('support')">Support</div></div>
 <script>
 let tmp={};let orders=JSON.parse(localStorage.getItem('rfk_orders')||'[]');
-function op(id){hideAll();document.getElementById(id).classList.remove('hidden')}
-function bk(){hideAll();document.getElementById('home').classList.remove('hidden');showTab('home')}
+function op(id){
+  hideAll();
+  document.getElementById(id).classList.remove('hidden');
+  localStorage.setItem('rfk-last', id);
+  history.pushState(null, '', '#'+id);
+}
+function bk(){
+  hideAll();
+  document.getElementById('home').classList.remove('hidden');
+  localStorage.setItem('rfk-last','home');
+  history.pushState(null, '', '/');
+}
 function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')})}
-function showTab(t){hideAll();document.getElementById(t==='home'?'home':t).classList.remove('hidden');document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');if(t==='pesanan')renderPesanan();if(t==='riwayat')renderRiwayat()}
+function showTab(t){
+  hideAll();
+  let id = t==='home'?'home':t;
+  document.getElementById(id).classList.remove('hidden');
+  localStorage.setItem('rfk-last',id);
+  location.hash=id;
+}
 function beli(game,item,price){
   tmp={game,item,price};
   document.getElementById('fjudul').innerText=game+' - '+item+' - Rp '+price;
@@ -182,6 +198,21 @@ async function selesai(id){
   if(!confirm('Selesaikan pesanan ini?'))return;
   await fs.updateDoc(fs.doc(db, "orders", id), {status:'selesai'});
 }
+  // FIX REFRESH BALIK LAGI
+window.addEventListener('DOMContentLoaded', ()=>{
+  let last = location.hash.replace('#','') || localStorage.getItem('rfk-last');
+  if(last && document.getElementById(last)){
+    hideAll();
+    document.getElementById(last).classList.remove('hidden');
+  }
+});
+window.addEventListener('popstate', ()=>{
+  let last = location.hash.replace('#','') || 'home';
+  if(document.getElementById(last)){
+    hideAll();
+    document.getElementById(last).classList.remove('hidden');
+  }
+});
 </script>
 <script>
 // DARK MODE - JANGAN DIHAPUS LAGI!
