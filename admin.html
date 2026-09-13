@@ -34,7 +34,7 @@ window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setD
 <div id="login">
 <h2>🔐 RFK STORE ADMIN</h2>
 <div class="card">
-<input id="pass" type="password" placeholder="Password admin RFK042326">
+<input id="pass" type="password" placeholder="Masukkan Password Admin">
 <button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
 </div>
 </div>
@@ -52,10 +52,10 @@ window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setD
 <small style="color:#888">Update harga langsung realtime ke web pembeli!</small><br><br>
 <input id="p_game" placeholder="Game: mobile legend / pubg / roblox / valorant">
 <input id="p_item" placeholder="Item: 86 Diamonds">
-<input id="p_harga" type="number" placeholder="Harga Jual: 27053">
+<input id="p_harga" type="number" placeholder="Harga Jual">
 <input id="p_modal" type="number" placeholder="Modal Barongsay (opsional)">
 <button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
-<button class="btn btn-yellow" onclick="syncBarongsay()">🔄 Sync Barongsay (Butuh API)</button>
+<button class="btn btn-yellow" onclick="syncBarongsay()">🔄 Sync Barongsay</button>
 <div id="listHarga" style="margin-top:12px"></div>
 </div>
 
@@ -130,7 +130,7 @@ async function updateHarga(){
   if(!g||!i||!h) return alert('Isi Game, Item, Harga!');
   let id=g+'_'+i.replace(/ /g,'_');
   await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
-  alert('Berhasil update '+i+' jadi Rp '+h+' REALTIME!');
+  alert('Berhasil update '+i+' jadi Rp '+h);
   document.getElementById('p_item').value='';document.getElementById('p_harga').value='';
 }
 
@@ -161,7 +161,7 @@ function filter(){
 async function selesai(id){if(confirm('Selesaikan pesanan ini?'))await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 async function hapus(id){if(confirm('Hapus permanen?'))await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
 function syncBarongsay(){
-  alert('Kirim API KEY Barongsay lu ke gue, nanti gue bikinin bot auto sync harga modal + auto untung 10%!');
+  alert('Kirim API KEY Barongsay lu ke gue besti!');
 }
 </script>
 </body>
