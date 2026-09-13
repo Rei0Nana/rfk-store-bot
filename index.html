@@ -128,7 +128,7 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 
 <script>
 let tmp={};let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
-const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='rfk123'){localStorage.setItem('rfk-admin','true');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
+const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='RFK042326'){localStorage.setItem('rfk-admin','true');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
 function op(id){hideAll();document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;}
 function bk(){hideAll();document.getElementById('home').classList.remove('hidden');localStorage.setItem('rfk-last','home');location.hash='home';}
 function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
