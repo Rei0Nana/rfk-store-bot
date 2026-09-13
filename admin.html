@@ -3,164 +3,287 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN PANEL</title>
+<title>RFK STORE</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px}
-.card{background:#231c28;border-radius:16px;padding:14px;margin:10px 0;border:1px solid #3a2d3f;box-shadow:0 4px 12px #00000080}
-input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;background:#141018;color:white;margin:6px 0}
-.btn{width:100%;padding:12px;border:none;border-radius:12px;font-weight:800;cursor:pointer;margin-top:8px}
-.btn-pink{background:#e84393;color:white}
-.btn-green{background:#00c853;color:white}
-.btn-red{background:#ff3b3b;color:white}
-.btn-yellow{background:#ffb300;color:black}
-.badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}
-.berjalan{background:orange}.selesai{background:#00c853}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.stat{background:#231c28;padding:12px;border-radius:12px;text-align:center;border:1px solid #3a2d3f}
-.stat b{font-size:22px;display:block;color:#ff8fab}
+:root{--bg:#fff0f5;--card:white;--text:#4a2a3a;--pink:#ff8fab;--border:#ffe0ec;--nav:white;--shadow:#ffd6e3;--kimg:white}
+[data-theme="dark"]{--bg:#141018;--card:#231c28;--text:#ffc2d9;--pink:#e84393;--border:#3a2d3f;--nav:#231c28;--shadow:#00000080;--kimg:#2f2535}
+body{background:var(--bg);margin:0;font-family:sans-serif;color:var(--text);padding-bottom:85px;transition:0.3s}
+.header{background:var(--card);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:99;border-bottom:1px solid #ffd1dc}
+.header-left{display:flex;align-items:center;gap:10px}
+.header img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:white;border:1px solid var(--border)}
+.header b{color:#e84393;font-size:22px}
+#theme-toggle{background:var(--card);border:1px solid var(--border);border-radius:99px;width:40px;height:40px;font-size:18px;cursor:pointer}
+.main{max-width:1100px;margin:0 auto}
+.banner{margin:12px;background:linear-gradient(135deg,#ff8fab,#ffb3c6);border-radius:18px;padding:18px;color:white}
+.jam-big{margin:0 12px 12px;background:var(--card);border:2px dashed #ff8fab;border-radius:16px;padding:14px;text-align:center;box-shadow:0 3px 10px var(--shadow)}
+.jam-big b{font-size:15px}
+.jam-big span{font-size:22px;color:#5f7cff;font-weight:900;display:block;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.kcard{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 4px 12px var(--shadow);border:1px solid var(--border);text-align:center;font-weight:700;font-size:12px;padding-bottom:10px;cursor:pointer;color:var(--text)}
+.kcard img{width:100%;height:110px;object-fit:contain;background:var(--kimg);display:block;padding:8px}
+.kcard span{display:block;padding-top:6px}
+.pcard{background:var(--card);margin:12px;border-radius:18px;padding:14px;box-shadow:0 3px 10px var(--shadow);border:1px solid var(--border)}
+.tit{background:#ff8fab;color:white;padding:5px 12px;border-radius:20px;display:inline-block;margin:14px 0 8px;font-size:12px;font-weight:700}
+.price{display:flex;justify-content:space-between;background:var(--bg);padding:11px 12px;border-radius:12px;margin:7px 0;border:1px solid var(--border);font-size:13px;cursor:pointer}
+.price b{color:#e84393}
+.btn{width:100%;background:#ff8fab;color:white;border:none;padding:11px;border-radius:12px;font-weight:700;margin-top:10px;cursor:pointer}
+.btn2{width:100%;border:none;padding:14px;border-radius:12px;font-weight:800;margin-top:10px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-batal{width:100%;background:transparent;color:#888;border:1px solid var(--border);padding:12px;border-radius:12px;font-weight:700;margin-top:8px;cursor:pointer}
 .hidden{display:none}
-.price-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #2e2433}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--nav);display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -3px 10px var(--shadow);border-radius:18px 18px 0 0;max-width:1100px;margin:0 auto;z-index:20}
+.nav div{font-size:10px;text-align:center;padding:6px 10px;border-radius:10px;cursor:pointer;color:var(--text)}
+.active{background:#ffe4ec;color:#e84393!important;font-weight:700}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);margin:6px 0;background:var(--bg);color:var(--text);font-family:sans-serif}
+.warn{border:1.5px solid #ff3b3b;color:#ff3b3b;background:#fff0f0;border-radius:20px;padding:8px 12px;font-size:11px;text-align:center;margin-top:10px;font-weight:600}
+.content-pad{padding:12px}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}.berjalan{background:orange}.selesai{background:#00c853}
+.admin-only{display:none}.is-admin .admin-only{display:block!important}
+.support-card{text-align:center;padding:20px 14px}
+.support-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:14px;font-weight:800;text-decoration:none;margin:10px 0;font-size:14px}
+.wa-btn{background:#25D366;color:white}.discord-btn{background:#5865F2;color:white}
+.star{font-size:26px;cursor:pointer;color:#ddd}.star.active{color:#ffc107}
+.review-card{border-bottom:1px solid var(--border);padding:10px 0}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
 const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy};
+window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy};
 </script>
 </head>
 <body>
-<div id="login">
-<h2>🔐 RFK STORE ADMIN</h2>
-<div class="card">
-<input id="pass" type="password" placeholder="Password admin">
-<button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
-</div>
-</div>
+<div class="main">
+<div class="header"><div class="header-left"><img src="./Logo.jpg"><b>RFK STORE</b></div><button id="theme-toggle">🌙</button></div>
 
-<div id="dash" class="hidden">
-<h2>📊 Dashboard RFK STORE</h2>
+<div id="home">
+<div class="banner"><h2 style="margin:0">Top-Up Game Murah & Cepat</h2><p style="margin:4px 0 0;font-size:12px">Proses Instan - Harga Terbaik</p></div>
+<div class="jam-big"><b>⏰ JAM OPERASIONAL</b><span>08:00 - 22:00 WIB</span><small style="color:#888">Fast Respon di jam kerja!</small></div>
+<div style="padding:0 12px"><b>Kategori Game</b></div>
 <div class="grid">
-<div class="stat"><b id="totalOrder">0</b><small>Total Order</small></div>
-<div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
-<div class="stat"><b id="totalSelesai">0</b><small>Selesai</small></div>
+<div class="kcard" onclick="op('ml')"><img src="./ml.jpg"><span>Mobile Legends</span></div>
+<div class="kcard" onclick="op('pb')"><img src="./Pubg.jpg"><span>PUBG Mobile</span></div>
+<div class="kcard" onclick="op('rb')"><img src="./roblox.jpg"><span>Roblox</span></div>
+<div class="kcard" onclick="op('vl')"><img src="./Valorant.jpg"><span>Valorant</span></div>
 </div>
 
-<div class="card">
-<h3>💰 BOT HARGA REALTIME - BARONGSAY</h3>
-<input id="p_game" placeholder="Game: mobile legend">
-<input id="p_item" placeholder="Item: 86 Diamonds">
-<input id="p_harga" type="number" placeholder="Harga Jual: 20000">
-<input id="p_modal" type="number" placeholder="Harga Modal Barongsay (opsional)">
-<button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
-<button class="btn btn-yellow" onclick="syncBarongsay()">🔄 Sync Otomatis dari Barongsay</button>
-<div id="listHarga" style="margin-top:12px"></div>
+<div style="padding:0 12px"><b>Produk Paling Digemari</b></div>
+<div class="pcard">
+<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100)','33657')"><span>Weekly Pass - ML</span><b>Rp 33.657</b></div>
+<div class="price" onclick="beliPUBG('PUBG','60 UC','18014')"><span>60 UC - PUBG</span><b>Rp 18.014</b></div>
+<div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux - Roblox</span><b>Rp 82.500</b></div>
+<div class="price" onclick="beliValo('Valorant','475 Points','55300')"><span>475 Points - Valorant</span><b>Rp 55.300</b></div>
 </div>
 
-<div class="card">
-<input id="search" placeholder="🔍 Cari ID / Game / Username..." oninput="filter()">
+<div style="padding:0 12px"><b>Metode Pembayaran</b></div>
+<div class="pcard" style="text-align:center">Via QRIS atau BCA</div>
+
 </div>
-<h3>🔥 Pesanan Berjalan</h3>
-<div id="listJalan"></div>
-<h3>✅ Riwayat Selesai</h3>
-<div id="listSelesai"></div>
-<button class="btn btn-red" onclick="logout()">Logout Admin</button>
+
+<div id="ml" class="hidden content-pad">
+<h3>MOBILE LEGENDS</h3>
+<div class="tit">⚡Spesial item ⚡</div>
+<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100)','33657')"><span>Weekly Diamond Pass (Event Topup +100)</span><b>Rp 33.657</b></div>
+<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100) x2','67312')"><span>Weekly Diamond Pass (Event Topup +100) x2</span><b>Rp 67.312</b></div>
+<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100) x3','100968')"><span>Weekly Diamond Pass (Event Topup +100) x3</span><b>Rp 100.968</b></div>
+<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100) x4','134624')"><span>Weekly Diamond Pass (Event Topup +100) x4</span><b>Rp 134.624</b></div>
+<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100) x5','168280')"><span>Weekly Diamond Pass (Event Topup +100) x5</span><b>Rp 168.280</b></div>
+<div class="tit">🔥 FIRST TOP UP 🔥</div>
+<div class="price" onclick="beliML('ML','50 + 50 Bonus','16999')"><span>50 + 50 Bonus</span><b>Rp 16.999</b></div>
+<div class="price" onclick="beliML('ML','150 + 150 Bonus','50835')"><span>150 + 150 Bonus</span><b>Rp 50.835</b></div>
+<div class="price" onclick="beliML('ML','250 + 250 Bonus','84838')"><span>250 + 250 Bonus</span><b>Rp 84.838</b></div>
+<div class="price" onclick="beliML('ML','500 + 500 Bonus','170640')"><span>500 + 500 Bonus</span><b>Rp 170.640</b></div>
+<div class="tit">⚡ Paling Laris ⚡</div>
+<div class="price" onclick="beliML('ML','5 Diamonds ( 5 + 0 Bonus )','1777')"><span>5 Diamonds ( 5 + 0 Bonus )</span><b>Rp 1.777</b></div>
+<div class="price" onclick="beliML('ML','10 Diamonds ( 10 + 0 Bonus )','3461')"><span>10 Diamonds ( 10 + 0 Bonus )</span><b>Rp 3.461</b></div>
+<div class="price" onclick="beliML('ML','28 Diamonds ( 25 + 3 Bonus )','9479')"><span>28 Diamonds ( 25 + 3 Bonus )</span><b>Rp 9.479</b></div>
+<div class="price" onclick="beliML('ML','44 Diamonds ( 40 + 4 Bonus )','14153')"><span>44 Diamonds ( 40 + 4 Bonus )</span><b>Rp 14.153</b></div>
+<div class="price" onclick="beliML('ML','59 Diamonds ( 53 + 6 Bonus )','18731')"><span>59 Diamonds ( 53 + 6 Bonus )</span><b>Rp 18.731</b></div>
+<div class="price" onclick="beliML('ML','85 Diamonds ( 77 + 8 Bonus )','27053')"><span>85 Diamonds ( 77 + 8 Bonus )</span><b>Rp 27.053</b></div>
+<div class="price" onclick="beliML('ML','170 Diamonds ( 154 + 16 Bonus )','53637')"><span>170 Diamonds ( 154 + 16 Bonus )</span><b>Rp 53.637</b></div>
+<div class="price" onclick="beliML('ML','240 Diamonds ( 217 + 23 Bonus )','75792')"><span>240 Diamonds ( 217 + 23 Bonus )</span><b>Rp 75.792</b></div>
+<div class="price" onclick="beliML('ML','296 Diamonds ( 256 + 40 Bonus )','93841')"><span>296 Diamonds ( 256 + 40 Bonus )</span><b>Rp 93.841</b></div>
+<div class="price" onclick="beliML('ML','408 Diamonds ( 367 + 41 Bonus )','129936')"><span>408 Diamonds ( 367 + 41 Bonus )</span><b>Rp 129.936</b></div>
+<div class="price" onclick="beliML('ML','568 Diamonds ( 503 + 65 Bonus )','177302')"><span>568 Diamonds ( 503 + 65 Bonus )</span><b>Rp 177.302</b></div>
+<div class="price" onclick="beliML('ML','2010 Diamonds ( 1708 + 302 Bonus )','594471')"><span>2010 Diamonds ( 1708 + 302 Bonus )</span><b>Rp 594.471</b></div>
+<div class="price" onclick="beliML('ML','4830 Diamonds ( 4003 + 827 Bonus )','1417774')"><span>4830 Diamonds ( 4003 + 827 Bonus )</span><b>Rp 1.417.774</b></div>
 </div>
+
+<div id="pb" class="hidden content-pad">
+<h3>PUBG MOBILE</h3>
+<div class="price" onclick="beliPUBG('PUBG','60 UC','18014')"><span>60 UC</span><b>Rp 18.014</b></div>
+<div class="price" onclick="beliPUBG('PUBG','325 (300+25) UC','90467')"><span>325 (300+25) UC</span><b>Rp 90.467</b></div>
+<div class="price" onclick="beliPUBG('PUBG','660 (600+60) UC','180934')"><span>660 (600+60) UC</span><b>Rp 180.934</b></div>
+<div class="price" onclick="beliPUBG('PUBG','1105 (1020+85) UC','307427')"><span>1105 (1020+85) UC</span><b>Rp 307.427</b></div>
+<div class="price" onclick="beliPUBG('PUBG','1500 (1380+120) UC','415906')"><span>1500 (1380+120) UC</span><b>Rp 415.906</b></div>
+<div class="price" onclick="beliPUBG('PUBG','1800 (1500+300) UC','452739')"><span>1800 (1500+300) UC</span><b>Rp 452.739</b></div>
+</div>
+
+<div id="rb" class="hidden content-pad">
+<h3>ROBLOX (VILOG)</h3>
+<div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux</span><b>Rp 82.500</b></div>
+<div class="price" onclick="beliRoblox('1000 Robux','165000')"><span>1000 Robux</span><b>Rp 165.000</b></div>
+<div class="price" onclick="beliRoblox('1500 Robux','247500')"><span>1500 Robux</span><b>Rp 247.500</b></div>
+<div class="price" onclick="beliRoblox('2000 Robux','330000')"><span>2000 Robux</span><b>Rp 330.000</b></div>
+<div class="price" onclick="beliRoblox('5000 Robux','825000')"><span>5000 Robux</span><b>Rp 825.000</b></div>
+<div class="price" onclick="beliRoblox('10.000 Robux','1650000')"><span>10.000 Robux</span><b>Rp 1.650.000</b></div>
+</div>
+
+<div id="vl" class="hidden content-pad">
+<h3>Valorant</h3>
+<div class="price" onclick="beliValo('Valorant','475 Points','55300')"><span>475 Points</span><b>Rp 55.300</b></div>
+<div class="price" onclick="beliValo('Valorant','1000 Points','110700')"><span>1000 Points</span><b>Rp 110.700</b></div>
+<div class="price" onclick="beliValo('Valorant','1475 Points','166000')"><span>1475 Points</span><b>Rp 166.000</b></div>
+<div class="price" onclick="beliValo('Valorant','2050 Points','221300')"><span>2050 Points</span><b>Rp 221.300</b></div>
+<div class="price" onclick="beliValo('Valorant','2525 Points','276700')"><span>2525 Points</span><b>Rp 276.700</b></div>
+<div class="price" onclick="beliValo('Valorant','3050 Points','332000')"><span>3050 Points</span><b>Rp 332.000</b></div>
+<div class="price" onclick="beliValo('Valorant','3650 Points','384300')"><span>3650 Points</span><b>Rp 384.300</b></div>
+<div class="price" onclick="beliValo('Valorant','4125 Points','439600')"><span>4125 Points</span><b>Rp 439.600</b></div>
+<div class="price" onclick="beliValo('Valorant','4650 Points','495000')"><span>4650 Points</span><b>Rp 495.000</b></div>
+<div class="price" onclick="beliValo('Valorant','5350 Points','552200')"><span>5350 Points</span><b>Rp 552.200</b></div>
+<div class="price" onclick="beliValo('Valorant','9000 Points','936500')"><span>9000 Points</span><b>Rp 936.500</b></div>
+<div class="price" onclick="beliValo('Valorant','11000 Points','1085600')"><span>11000 Points</span><b>Rp 1.085.600</b></div>
+<div class="price" onclick="beliValo('Valorant','13050 Points','1306900')"><span>13050 Points</span><b>Rp 1.306.900</b></div>
+<div class="price" onclick="beliValo('Valorant','20000 Points','2022100')"><span>20000 Points</span><b>Rp 2.022.100</b></div>
+</div>
+
+<div id="form" class="hidden content-pad"><h3 id="fjudul"></h3><div class="pcard" id="formContent"></div></div>
+
+<div id="bayar" class="hidden content-pad">
+<h3>Konfirmasi Pesanan</h3>
+<div class="pcard" id="bayarInfo"></div>
+<div class="pcard" style="text-align:center">
+<b>Pembayaran: QRIS / BCA</b><br><small style="color:#888">Pilih chat via mana?</small><br><br>
+<button class="btn2 wa-btn" onclick="konfirmWA()">💚 Chat via WhatsApp Bisnis</button>
+<button class="btn2 discord-btn" onclick="konfirmDiscord()">🎮 Chat via Discord</button>
+<button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button>
+</div>
+</div>
+
+<div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan</h3><div id="listPesanan"></div></div>
+<div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai</h3><div id="listRiwayat"></div></div>
+
+<div id="ulasan" class="hidden content-pad">
+<h3>⭐ Ulasan Pelanggan</h3>
+<div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div>
+<div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div>
+<div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div>
+</div>
+
+<div id="support" class="hidden content-pad">
+<h3>Support</h3>
+<div class="pcard support-card"><div style="font-size:42px">💬</div><b>Butuh Bantuan?</b><br><small style="color:#888">Admin Online 08:00 - 22:00 WIB</small><br><br><a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a><a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a></div>
+</div>
+</div>
+
+<div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-ulasan" onclick="showTab('ulasan')">Ulasan</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-support" onclick="showTab('support')">Support</div></div>
 
 <script>
-let allData=[];
-function login(){
-  if(document.getElementById('pass').value==='RFK042326'){
-    localStorage.setItem('rfk-admin','true');
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
-    load();
-  }else alert('Password salah!');
-}
-if(localStorage.getItem('rfk-admin')==='true'){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
-  setTimeout(load,1000);
-}
-function logout(){localStorage.removeItem('rfk-admin');location.reload();}
+let tmp={};let lastGame='home';let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
+const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='RFK042326'){localStorage.setItem('rfk-admin','true');alert('Mode Admin Aktif RFK042326');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
+function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;}
+function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
+function showTab(t){hideAll();let id=t==='home'?'home':t;document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');}
+function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');}
+function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');}}
 
-function load(){
-  const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
-  window.fs.onSnapshot(q,s=>{
-    allData=[];
-    s.forEach(d=>{allData.push({id:d.id,...d.data()})});
-    render(allData);
-  });
-  loadHarga();
+function beliML(g,i,p){
+tmp={game:g,item:i,price:p,type:'ml'};
+document.getElementById('fjudul').innerText=g+' - '+i;
+document.getElementById('formContent').innerHTML=`
+<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678">
+<label>Server *</label><input id="id2" placeholder="Contoh: 1234">
+<button class=btn2 style="background:#ff8fab" onclick=goBayarML()>Lanjut Pilih Chat 💬</button>
+<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
+hideAll();document.getElementById('form').classList.remove('hidden');
 }
-
-function render(data){
-  let jalan='',selesai='';let cJ=0,cS=0;
-  data.forEach(o=>{
-    let t=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID'):'-';
-    let card=`<div class="card">
-    <b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br>
-    <small style="color:#888">${t}</small><br><br>
-    ID: <b>${o.id1||'-'}</b> ${o.id2||''}<br>
-    ${o.id3?`Pass: <b style="color:#ff8fab">${o.id3} ${o.extra||''}</b><br>`:''}
-    Harga: <b>Rp ${o.price}</b><br>
-    Device: <small>${o.deviceId||'-'}</small><br><br>
-    ${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}
-    <button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button>
-    </div>`;
-    if(o.status==='berjalan'){jalan+=card;cJ++;}else{selesai+=card;cS++;}
-  });
-  document.getElementById('listJalan').innerHTML=jalan||'<div class=card>Kosong</div>';
-  document.getElementById('listSelesai').innerHTML=selesai||'<div class=card>Kosong</div>';
-  document.getElementById('totalOrder').innerText=data.length;
-  document.getElementById('totalJalan').innerText=cJ;
-  document.getElementById('totalSelesai').innerText=cS;
+async function goBayarML(){
+const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';
+if(!id1) return alert('User ID wajib!');if(!id2) return alert('Server wajib!');
+tmp={...tmp,id1,id2,status:'berjalan',deviceId,createdAt:Date.now()};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>User ID: ${id1}<br>Server: ${id2}`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');
+try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
 }
-
-async function updateHarga(){
-  let g=document.getElementById('p_game').value.toLowerCase().trim();
-  let i=document.getElementById('p_item').value.toLowerCase().trim();
-  let h=Number(document.getElementById('p_harga').value);
-  let m=Number(document.getElementById('p_modal').value)||0;
-  if(!g||!i||!h) return alert('Isi Game, Item, Harga!');
-  let id=g+'_'+i.replace(/ /g,'_');
-  await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
-  alert('Berhasil update '+i+' jadi Rp '+h+' REALTIME!');
-  document.getElementById('p_item').value='';document.getElementById('p_harga').value='';
+function beliPUBG(g,i,p){
+tmp={game:g,item:i,price:p,type:'pubg'};
+document.getElementById('fjudul').innerText=g+' - '+i;
+document.getElementById('formContent').innerHTML=`
+<label>PUBG ID *</label><input id="id1" placeholder="Contoh: 5123456789">
+<button class=btn2 style="background:#ff8fab" onclick=goBayarPUBG()>Lanjut Pilih Chat 💬</button>
+<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
+hideAll();document.getElementById('form').classList.remove('hidden');
 }
-
-function loadHarga(){
-  window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
-    let html='';
-    s.forEach(d=>{
-      let p=d.data();
-      let untung = p.modal?` (Untung Rp ${p.price-p.modal})`:'';
-      html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} ${untung}</small></span><button onclick="editHarga('${d.id}','${p.game}','${p.item}',${p.price})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
-    });
-    document.getElementById('listHarga').innerHTML=html||'Belum ada harga';
-  });
+async function goBayarPUBG(){
+const id1=document.getElementById('id1')?.value.trim()||'';if(!id1) return alert('PUBG ID wajib!');
+tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,createdAt:Date.now()};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>PUBG ID: ${id1}`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');
+try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
 }
-
-function editHarga(id,g,i,p){
-  document.getElementById('p_game').value=g;
-  document.getElementById('p_item').value=i;
-  document.getElementById('p_harga').value=p;
-  window.scrollTo(0,0);
+function beliValo(g,i,p){
+tmp={game:g,item:i,price:p,type:'valo'};
+document.getElementById('fjudul').innerText=g+' - '+i;
+document.getElementById('formContent').innerHTML=`
+<label>Valorant ID *</label><input id="id1" placeholder="Contoh: Nama#1234">
+<button class=btn2 style="background:#ff8fab" onclick=goBayarValo()>Lanjut Pilih Chat 💬</button>
+<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
+hideAll();document.getElementById('form').classList.remove('hidden');
 }
-
-function filter(){
-  let k=document.getElementById('search').value.toLowerCase();
-  let f=allData.filter(o=> JSON.stringify(o).toLowerCase().includes(k));
-  render(f);
+async function goBayarValo(){
+const id1=document.getElementById('id1')?.value.trim()||'';if(!id1) return alert('Valorant ID wajib!');
+tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,createdAt:Date.now()};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Valorant ID: ${id1}`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');
+try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
 }
-async function selesai(id){if(confirm('Selesaikan?'))await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
-async function hapus(id){if(confirm('Hapus permanen?'))await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
-
-// BOT BARONGSAY - ganti API KEY lu disini nanti
-async function syncBarongsay(){
-  alert('Untuk sync otomatis Barongsay, lu butuh API KEY Barongsay.\n\nNanti bot bakal auto ambil harga modal + lu set untung otomatis.\n\nKirim API KEY Barongsay lu ke gue, gue bikinin bot auto nya langsung!');
+function beliRoblox(i,p){
+tmp={game:'Roblox',item:i,price:p,type:'roblox'};
+document.getElementById('fjudul').innerText='Roblox - '+i;
+document.getElementById('formContent').innerHTML=`<label>Username *</label><input id="id1" placeholder="Username"><label>Password *</label><input id="id2" placeholder="Password"><label>Kode backup (minimal 2) *</label><input id="id3" placeholder="abc123 - def456"><button class=btn2 style="background:#ff8fab" onclick=goBayarRoblox()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
+hideAll();document.getElementById('form').classList.remove('hidden');
 }
+async function goBayarRoblox(){
+const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';const id3=document.getElementById('id3')?.value.trim()||'';
+if(!id1||!id2||!id3)return alert('MOHON DIISI DENGAN SANGAT TELITI!');
+tmp={...tmp,id1,id2,id3,status:'berjalan',deviceId,createdAt:Date.now()};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>User: ${id1}`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');
+try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
+}
+function getPesan(){
+if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUser ID: ${tmp.id1}\nServer: ${tmp.id2}`;
+if(tmp.type==='pubg') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nPUBG ID: ${tmp.id1}`;
+if(tmp.type==='valo') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nValorant ID: ${tmp.id1}`;
+return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nID: ${tmp.id1} ${tmp.id2||''} ${tmp.id3||''}`;
+}
+function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
+function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya besti!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
+let selectedStar=5;
+function setStar(n){selectedStar=n;document.querySelectorAll('#starInput .star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}
+setStar(5);
+async function kirimUlasan(){
+let nama=document.getElementById('namaUlasan').value||'Anonim';
+let komen=document.getElementById('komentarUlasan').value;
+if(!komen) return alert('Tulis komentar dulu!');
+await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});
+document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya besti! ⭐');
+}
+setTimeout(()=>{try{
+const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
+window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;if(!isAdmin&&o.deviceId!==deviceId)return;let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>${o.id1} ${o.id2||''} ${o.id3||''}</small><br>Rp ${o.price}<br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
+const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
+window.fs.onSnapshot(q2,s=>{
+let html='';let total=0,count=0;
+s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});
+document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';
+if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}
+});
+}catch(e){}},1500);
+async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
+const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
+window.addEventListener('DOMContentLoaded',()=>{let h=location.hash.replace('#','')||localStorage.getItem('rfk-last')||'home';if(document.getElementById(h)){hideAll();document.getElementById(h).classList.remove('hidden');if(h!=='home')lastGame=h;showTab(h);}});
 </script>
 </body>
 </html>
