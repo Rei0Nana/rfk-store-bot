@@ -16,6 +16,9 @@ body{background:var(--bg);margin:0;font-family:sans-serif;color:var(--text);padd
 #theme-toggle{background:var(--card);border:1px solid var(--border);border-radius:99px;width:40px;height:40px;font-size:18px;cursor:pointer}
 .main{max-width:1100px;margin:0 auto}
 .banner{margin:12px;background:linear-gradient(135deg,#ff8fab,#ffb3c6);border-radius:18px;padding:18px;color:white}
+.jam-big{margin:0 12px 12px;background:var(--card);border:2px dashed #ff8fab;border-radius:16px;padding:14px;text-align:center;box-shadow:0 3px 10px var(--shadow)}
+.jam-big b{font-size:15px}
+.jam-big span{font-size:22px;color:#5f7cff;font-weight:900;display:block;margin-top:2px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
 .kcard{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 4px 12px var(--shadow);border:1px solid var(--border);text-align:center;font-weight:700;font-size:12px;padding-bottom:10px;cursor:pointer;color:var(--text)}
 .kcard img{width:100%;height:110px;object-fit:contain;background:var(--kimg);display:block;padding:8px}
@@ -38,10 +41,9 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}.berjalan{background:orange}.selesai{background:#00c853}
 .admin-only{display:none}.is-admin .admin-only{display:block!important}
 .support-card{text-align:center;padding:20px 14px}
-.support-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:14px;font-weight:800;text-decoration:none;margin:10px 0;font-size:14px;transition:0.2s}
+.support-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:14px;font-weight:800;text-decoration:none;margin:10px 0;font-size:14px}
 .wa-btn{background:#25D366;color:white;box-shadow:0 4px 12px #25d36655}
 .discord-btn{background:#5865F2;color:white;box-shadow:0 4px 12px #5865f255}
-.support-btn:active{transform:scale(0.97)}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -57,6 +59,14 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 
 <div id="home">
 <div class="banner"><h2 style="margin:0">Top-Up Game Murah & Cepat</h2><p style="margin:4px 0 0;font-size:12px">Proses Instan - Harga Terbaik</p></div>
+
+<!-- JAM OPERASIONAL PINDAH KE ATAS + BESAR -->
+<div class="jam-big">
+<b>⏰ JAM OPERASIONAL</b>
+<span>08:00 - 22:00 WIB</span>
+<small style="color:#888">Fast Respon di jam kerja!</small>
+</div>
+
 <div style="padding:0 12px"><b>Kategori Game</b></div>
 <div class="grid">
 <div class="kcard" onclick="op('ml')"><img src="./ml.jpg"><span>Mobile Legends</span></div>
@@ -72,11 +82,9 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beli('Valorant','475 Points','55300')"><span>475 Points - Valorant</span><b>Rp 55.300</b></div>
 </div>
 <div style="padding:0 12px"><b>Metode Pembayaran</b></div>
-<div class="pcard" style="text-align:center">Via QRIS atau Transfer BCA</div>
-<div class="pcard"><b>Jam Operasional</b><br><b style="color:#5f7cff">08:00 - 22:00 WIB</b></div>
+<div class="pcard" style="text-align:center">Via QRIS atau Transfer BCA 2832891607 A.n Reza</div>
 </div>
 
-<!-- ML LENGKAP -->
 <div id="ml" class="hidden content-pad"><h3>Mobile Legends</h3>
 <div class="tit">⚡Spesial item ⚡ (08-22 WIB)</div>
 <div class="price" onclick="beli('ML','Weekly Pass x1','33657')"><span>Weekly Pass x1</span><b>Rp 33.657</b></div><div class="price" onclick="beli('ML','Weekly Pass x2','67312')"><span>Weekly Pass x2</span><b>Rp 67.312</b></div><div class="price" onclick="beli('ML','Weekly Pass x3','100968')"><span>Weekly Pass x3</span><b>Rp 100.968</b></div><div class="price" onclick="beli('ML','Weekly Pass x4','134624')"><span>Weekly Pass x4</span><b>Rp 134.624</b></div><div class="price" onclick="beli('ML','Weekly Pass x5','168280')"><span>Weekly Pass x5</span><b>Rp 168.280</b></div>
@@ -84,24 +92,24 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beli('ML','50 + 50 Bonus','16999')"><span>50 + 50 Bonus</span><b>Rp 16.999</b></div><div class="price" onclick="beli('ML','150 + 150 Bonus','50835')"><span>150 + 150 Bonus</span><b>Rp 50.835</b></div><div class="price" onclick="beli('ML','250 + 250 Bonus','84838')"><span>250 + 250 Bonus</span><b>Rp 84.838</b></div><div class="price" onclick="beli('ML','500 + 500 Bonus','170640')"><span>500 + 500 Bonus</span><b>Rp 170.640</b></div>
 <div class="tit">⚡ Paling Laris ⚡</div>
 <div class="price" onclick="beli('ML','5 Diamonds','1777')"><span>5 Diamonds</span><b>Rp 1.777</b></div><div class="price" onclick="beli('ML','10 Diamonds','3461')"><span>10 Diamonds</span><b>Rp 3.461</b></div><div class="price" onclick="beli('ML','28 Diamonds','9479')"><span>28 Diamonds</span><b>Rp 9.479</b></div><div class="price" onclick="beli('ML','44 Diamonds','14153')"><span>44 Diamonds</span><b>Rp 14.153</b></div><div class="price" onclick="beli('ML','59 Diamonds','18731')"><span>59 Diamonds</span><b>Rp 18.731</b></div><div class="price" onclick="beli('ML','85 Diamonds','27053')"><span>85 Diamonds</span><b>Rp 27.053</b></div><div class="price" onclick="beli('ML','170 Diamonds','53637')"><span>170 Diamonds</span><b>Rp 53.637</b></div><div class="price" onclick="beli('ML','240 Diamonds','75792')"><span>240 Diamonds</span><b>Rp 75.792</b></div><div class="price" onclick="beli('ML','296 Diamonds','93841')"><span>296 Diamonds</span><b>Rp 93.841</b></div><div class="price" onclick="beli('ML','408 Diamonds','129936')"><span>408 Diamonds</span><b>Rp 129.936</b></div><div class="price" onclick="beli('ML','568 Diamonds','177302')"><span>568 Diamonds</span><b>Rp 177.302</b></div><div class="price" onclick="beli('ML','2010 Diamonds','594471')"><span>2010 Diamonds</span><b>Rp 594.471</b></div><div class="price" onclick="beli('ML','4830 Diamonds','1417774')"><span>4830 Diamonds</span><b>Rp 1.417.774</b></div>
-<button class="btn" onclick="bk()">Kembali</button></div>
+</div>
 
 <div id="pb" class="hidden content-pad"><h3>PUBG Mobile</h3>
-<div class="price" onclick="beli('PUBG','60 UC','18014')"><span>60 UC</span><b>Rp 18.014</b></div><div class="price" onclick="beli('PUBG','325 UC','90467')"><span>325 (300+25) UC</span><b>Rp 90.467</b></div><div class="price" onclick="beli('PUBG','660 UC','180934')"><span>660 (600+60) UC</span><b>Rp 180.934</b></div><div class="price" onclick="beli('PUBG','1105 UC','307427')"><span>1105 (1020+85) UC</span><b>Rp 307.427</b></div><div class="price" onclick="beli('PUBG','1500 UC','415906')"><span>1500 (1380+120) UC</span><b>Rp 415.906</b></div><div class="price" onclick="beli('PUBG','1800 UC','452739')"><span>1800 (1500+300) UC</span><b>Rp 452.739</b></div>
-<button class="btn" onclick="bk()">Kembali</button></div>
+<div class="price" onclick="beli('PUBG','60 UC','18014')"><span>60 UC</span><b>Rp 18.014</b></div><div class="price" onclick="beli('PUBG','325 UC','90467')"><span>325 UC</span><b>Rp 90.467</b></div><div class="price" onclick="beli('PUBG','660 UC','180934')"><span>660 UC</span><b>Rp 180.934</b></div><div class="price" onclick="beli('PUBG','1105 UC','307427')"><span>1105 UC</span><b>Rp 307.427</b></div><div class="price" onclick="beli('PUBG','1500 UC','415906')"><span>1500 UC</span><b>Rp 415.906</b></div><div class="price" onclick="beli('PUBG','1800 UC','452739')"><span>1800 UC</span><b>Rp 452.739</b></div>
+</div>
 
 <div id="rb" class="hidden content-pad"><h3>Roblox - Via Login</h3>
 <div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux</span><b>Rp 82.500</b></div><div class="price" onclick="beliRoblox('1000 Robux','165000')"><span>1000 Robux</span><b>Rp 165.000</b></div><div class="price" onclick="beliRoblox('1500 Robux','247500')"><span>1500 Robux</span><b>Rp 247.500</b></div><div class="price" onclick="beliRoblox('2000 Robux','330000')"><span>2000 Robux</span><b>Rp 330.000</b></div><div class="price" onclick="beliRoblox('5000 Robux','825000')"><span>5000 Robux</span><b>Rp 825.000</b></div><div class="price" onclick="beliRoblox('10000 Robux','1650000')"><span>10000 Robux</span><b>Rp 1.650.000</b></div>
-<button class="btn" onclick="bk()">Kembali</button></div>
+</div>
 
 <div id="vl" class="hidden content-pad"><h3>Valorant</h3>
 <div class="price" onclick="beli('Valorant','475 Points','55300')"><span>475 Points</span><b>Rp 55.300</b></div><div class="price" onclick="beli('Valorant','1000 Points','110700')"><span>1000 Points</span><b>Rp 110.700</b></div><div class="price" onclick="beli('Valorant','1475 Points','166000')"><span>1475 Points</span><b>Rp 166.000</b></div><div class="price" onclick="beli('Valorant','2050 Points','221300')"><span>2050 Points</span><b>Rp 221.300</b></div><div class="price" onclick="beli('Valorant','2525 Points','276700')"><span>2525 Points</span><b>Rp 276.700</b></div><div class="price" onclick="beli('Valorant','3050 Points','332000')"><span>3050 Points</span><b>Rp 332.000</b></div><div class="price" onclick="beli('Valorant','3650 Points','384300')"><span>3650 Points</span><b>Rp 384.300</b></div><div class="price" onclick="beli('Valorant','4125 Points','439600')"><span>4125 Points</span><b>Rp 439.600</b></div><div class="price" onclick="beli('Valorant','4650 Points','495000')"><span>4650 Points</span><b>Rp 495.000</b></div><div class="price" onclick="beli('Valorant','5350 Points','552200')"><span>5350 Points</span><b>Rp 552.200</b></div><div class="price" onclick="beli('Valorant','9000 Points','936500')"><span>9000 Points</span><b>Rp 936.500</b></div><div class="price" onclick="beli('Valorant','11000 Points','1085600')"><span>11000 Points</span><b>Rp 1.085.600</b></div><div class="price" onclick="beli('Valorant','13050 Points','1306900')"><span>13050 Points</span><b>Rp 1.306.900</b></div><div class="price" onclick="beli('Valorant','20000 Points','2022100')"><span>20000 Points</span><b>Rp 2.022.100</b></div>
-<button class="btn" onclick="bk()">Kembali</button></div>
+</div>
 
 <div id="form" class="hidden content-pad"><h3 id="fjudul"></h3><div class="pcard" id="formContent"></div></div>
-<div id="bayar" class="hidden content-pad"><h3>Pembayaran</h3><div class="pcard" id="bayarInfo"></div><div class="pcard"><b>Scan QRIS:</b><br><img class="qris-img" src="./qris.jpeg"><br><b>BCA: 2832891607 A.n Reza</b><br><br><button class="btn2" onclick="konfirm()">Konfirmasi WA</button><button class="btn" onclick="bk()">Kembali</button></div></div>
-<div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan (Realtime)</h3><div id="listPesanan"></div><button class="btn" onclick="showTab('home')">Kembali</button></div>
-<div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai (Realtime)</h3><div id="listRiwayat"></div><button class="btn" onclick="showTab('home')">Kembali</button></div>
+<div id="bayar" class="hidden content-pad"><h3>Pembayaran</h3><div class="pcard" id="bayarInfo"></div><div class="pcard"><b>Scan QRIS:</b><br><img class="qris-img" src="./qris.jpeg"><br><b>BCA: 2832891607 A.n Reza</b><br><br><button class="btn2" onclick="konfirm()">Konfirmasi WA</button></div></div>
+<div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan (Realtime)</h3><div id="listPesanan"></div></div>
+<div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai (Realtime)</h3><div id="listRiwayat"></div></div>
 
 <div id="support" class="hidden content-pad">
 <h3>Support</h3>
@@ -112,9 +120,7 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <br><br>
 <a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a>
 <a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a>
-<div class="info" style="margin-top:14px">Klik tombol langsung terhubung ke admin!</div>
 </div>
-<button class="btn" onclick="showTab('home')">Kembali ke Beranda</button>
 </div>
 </div>
 
@@ -126,16 +132,16 @@ const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==
 function op(id){hideAll();document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;}
 function bk(){hideAll();document.getElementById('home').classList.remove('hidden');localStorage.setItem('rfk-last','home');location.hash='home';}
 function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
-function showTab(t){hideAll();let id=t==='home'?'home':t;document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;}
-function beli(g,i,p){tmp={game:g,item:i,price:p};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>ID Game *</label><input id="id1" placeholder="Contoh: 12345678"><label>Server (Jika ada)</label><input id="id2" placeholder="Contoh: 9864"><div class=warn>Pastikan ID benar!</div><button class=btn2 onclick=goBayar()>Lanjut Bayar</button><button class=btn onclick=bk()>Batal</button>`;hideAll();document.getElementById('form').classList.remove('hidden');}
-async function goBayar(){const id1=document.getElementById('id1')?.value||'';const id2=document.getElementById('id2')?.value||'';if(!id1)return alert('ID Game wajib diisi!');tmp={...tmp,id1,id2,status:'berjalan',deviceId,createdAt:Date.now()};document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>ID: ${id1} ${id2||''}`;hideAll();document.getElementById('bayar').classList.remove('hidden');try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}}
-function beliRoblox(i,p){tmp={game:'Roblox',item:i,price:p};document.getElementById('fjudul').innerText='Roblox - Via Login';document.getElementById('formContent').innerHTML=`<div style="font-size:13px;line-height:1.6;color:var(--text);margin-bottom:12px;white-space:pre-line">Masukkan data akun kalian (*MOHON DIISI DENGAN SANGAT TELITI*)\n\n- Username: \n- Password: \n- Kode backup yang belum digunakan (minimal 2):\n- Pilihan Robux: ${i}\n\n<b>Pengerjaan top up robux via login membutuhkan waktu sekitar 15-30 menit, jadi mohon bersabar menunggu ya</b></div><label>Username *</label><input id="id1" placeholder="Username Roblox"><label>Password *</label><input id="id2" placeholder="Password Roblox"><label>Kode backup yang belum digunakan (minimal 2) *</label><input id="id3" placeholder="abc123 - def456"><button class=btn2 onclick=goBayarRoblox()>Lanjut Bayar</button><button class=btn onclick=bk()>Batal</button>`;hideAll();document.getElementById('form').classList.remove('hidden');}
+function showTab(t){hideAll();let id=t==='home'?'home':t;document.getElementById(id).classList.remove('hidden');localStorage.setItem('rfk-last',id);location.hash=id;document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');}
+function beli(g,i,p){tmp={game:g,item:i,price:p};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>ID Game *</label><input id="id1" placeholder="12345678"><label>Server (Jika ada)</label><input id="id2" placeholder="1234"><div class=warn>Pastikan ID benar!</div><button class=btn2 onclick=goBayar()>Lanjut Bayar</button>`;hideAll();document.getElementById('form').classList.remove('hidden');}
+async function goBayar(){const id1=document.getElementById('id1')?.value||'';const id2=document.getElementById('id2')?.value||'';if(!id1)return alert('ID wajib!');tmp={...tmp,id1,id2,status:'berjalan',deviceId,createdAt:Date.now()};document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>ID: ${id1} ${id2||''}`;hideAll();document.getElementById('bayar').classList.remove('hidden');try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}}
+function beliRoblox(i,p){tmp={game:'Roblox',item:i,price:p};document.getElementById('fjudul').innerText='Roblox - Via Login';document.getElementById('formContent').innerHTML=`<div style="font-size:13px;line-height:1.6;margin-bottom:12px;white-space:pre-line">Masukkan data akun kalian (*MOHON DIISI DENGAN SANGAT TELITI*)\n\n- Username: \n- Password: \n- Kode backup yang belum digunakan (minimal 2):\n- Pilihan Robux: ${i}\n\n<b>Pengerjaan top up robux via login membutuhkan waktu sekitar 15-30 menit, jadi mohon bersabar menunggu ya</b></div><label>Username *</label><input id="id1" placeholder="Username"><label>Password *</label><input id="id2" placeholder="Password"><label>Kode backup (minimal 2) *</label><input id="id3" placeholder="abc123 - def456"><button class=btn2 onclick=goBayarRoblox()>Lanjut Bayar</button>`;hideAll();document.getElementById('form').classList.remove('hidden');}
 async function goBayarRoblox(){const id1=document.getElementById('id1')?.value||'';const id2=document.getElementById('id2')?.value||'';const id3=document.getElementById('id3')?.value||'';if(!id1||!id2||!id3)return alert('MOHON DIISI DENGAN SANGAT TELITI!');tmp={...tmp,id1,id2,id3,extra:'Backup:'+id3,status:'berjalan',deviceId,createdAt:Date.now()};document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>User: ${id1}`;hideAll();document.getElementById('bayar').classList.remove('hidden');try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}}
 function konfirm(){let msg=`Halo RFK STORE mau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price} ID:${tmp.id1} ${tmp.id2||''} ${tmp.id3||''}`;window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg));showTab('pesanan');}
 setTimeout(()=>{try{const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;if(!isAdmin&&o.deviceId!==deviceId)return;let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>${o.id1} ${o.id2||''} ${o.id3||''}</small><br>Rp ${o.price}<br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});}catch(e){}},1500);
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
-window.addEventListener('DOMContentLoaded',()=>{let h=location.hash.replace('#','')||localStorage.getItem('rfk-last')||'home';if(document.getElementById(h)){hideAll();document.getElementById(h).classList.remove('hidden');}});
+window.addEventListener('DOMContentLoaded',()=>{let h=location.hash.replace('#','')||localStorage.getItem('rfk-last')||'home';if(document.getElementById(h)){hideAll();document.getElementById(h).classList.remove('hidden');showTab(h);}});
 </script>
 </body>
-</html
+</html>
