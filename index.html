@@ -158,7 +158,7 @@ async function konfirm(){
   showTab('pesanan');
 }
 
-fs.onSnapshot(fs.query(fs.collection(db, "orders"), fs.orderBy("ts","desc")), (snap)=>{
+fs.onSnapshot(fs.collection(db, "orders"), (snap)=>{
   let all=[];
   snap.forEach(d=>{ let o=d.data(); o.fbId=d.id; all.push(o); });
   orders = all;
