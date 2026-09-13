@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RFK STORE</title>
+<style>
+*{box-sizing:border-box}
+body{background:#fff0f5;margin:0;font-family:sans-serif;color:#4a2a3a;padding-bottom:85px}
+.header{background:white;padding:12px 14px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 2px 10px #ffc2d1;position:sticky;top:0;z-index:10}
+.header img{width:38px;height:38px;border-radius:50%;object-fit:contain;background:white;border:1px solid #ffe0ec}
+.header b{color:#e84393;font-size:22px}
+.main{max-width:1100px;margin:0 auto}
+.banner{margin:12px;background:linear-gradient(135deg,#ff8fab,#ffb3c6);border-radius:18px;padding:18px;color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.kcard{background:white;border-radius:18px;overflow:hidden;box-shadow:0 4px 12px #ffd6e3;border:1px solid #ffe0ec;text-align:center;font-weight:700;font-size:12px;padding-bottom:10px;cursor:pointer}
+.kcard img{width:100%;height:110px;object-fit:contain;background:white;display:block;padding:8px}
+.pcard{background:white;margin:12px;border-radius:18px;padding:14px;box-shadow:0 3px 10px #ffd6e3}
+.tit{background:#ff8fab;color:white;padding:5px 12px;border-radius:20px;display:inline-block;margin:14px 0 8px;font-size:12px;font-weight:700}
+.price{display:flex;justify-content:space-between;background:#fff8fb;padding:11px 12px;border-radius:12px;margin:7px 0;border:1px solid #ffe0ec;font-size:13px;cursor:pointer}
+.price b{color:#e84393}
+.btn{width:100%;background:#ff8fab;color:white;border:none;padding:11px;border-radius:12px;font-weight:700;margin-top:10px;cursor:pointer}
+.btn2{width:100%;background:#5f7cff;color:white;border:none;padding:11px;border-radius:12px;font-weight:700;margin-top:10px;cursor:pointer}
+.hidden{display:none}
+.nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:10px 0;box-shadow:0 -3px 10px #ffc2d1;border-radius:18px 18px 0 0;max-width:1100px;margin:0 auto;z-index:20}
+.nav div{font-size:11px;text-align:center;padding:6px 16px;border-radius:10px;cursor:pointer}
+.active{background:#ffe4ec;color:#e84393;font-weight:700}
+input{width:100%;padding:10px;border-radius:10px;border:1px solid #ffc2d1;margin:6px 0}
+.warn{border:1.5px solid #ff3b3b;color:#ff3b3b;background:#fff0f0;border-radius:20px;padding:8px 12px;font-size:11px;text-align:center;margin-top:10px;font-weight:600}
+.info{font-size:11px;background:#fff8fb;border:1px solid #ffe0ec;border-radius:10px;padding:10px;margin:6px 0;color:#6a4a5a}
+.qris-img{width:100%;max-width:320px;border-radius:12px;display:block;margin:10px auto}
+.content-pad{padding:12px}
+@media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr);gap:16px}.kcard img{height:150px}.nav{border-radius:20px;bottom:12px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="main">
+<div class="header"><img src="https://cdn.discordapp.com/attachments/1546102069629423690/1548534018201489489/IMG-20260913-WA1880.jpg?ex=6aa76830&is=6aa616b0&hm=b4ec35e3f38df3184b0a28e3d7b86bdbab1d4403a5969bb3af0b19bb0f678f19&"><b>RFK STORE</b></div>
+<div id="home">
+<div class="banner"><h2 style="margin:0">Top-Up Game Murah & Cepat</h2><p style="margin:4px 0 0;font-size:12px">Proses Instan - Harga Terbaik</p></div>
+<div style="padding:0 12px"><b>Kategori Game</b></div>
+<div class="grid">
+<div class="kcard" onclick="op('ml')"><img src="https://cdn.discordapp.com/attachments/1546102069629423690/1548534035377299507/ml.jpg?ex=6aa76834&is=6aa616b4&hm=5193a33f4d1b43dd951c24a95db93aabf50338053c35c26900bb51b8d66970d8&"><span>Mobile Legends</span></div>
+<div class="kcard" onclick="op('pb')"><img src="https://cdn.discordapp.com/attachments/1546102069629423690/1548534027659645030/IMG-20260913-WA8573.jpg?ex=6aa76832&is=6aa616b2&hm=84460cea66e3807a7b6c6065c22fa5e84857ce6a2860d195c446ad79e7f47e31&"><span>PUBG Mobile</span></div>
+<div class="kcard" onclick="op('rb')"><img src="https://cdn.discordapp.com/attachments/1546102069629423690/1548534042306158732/roblox.jpg?ex=6aa76836&is=6aa616b6&hm=db573e9c6f4d9a1fa259a405b1b0e7e313b7954c7f368d718c2a7351751aa7b6&"><span>Roblox</span></div>
+<div class="kcard" onclick="op('vl')"><img src="https://cdn.discordapp.com/attachments/1546102069629423690/1548535935958786088/IMG-20260913-WA9545.jpg?ex=6aa769f9&is=6aa61879&hm=fad614125a8e6b716bbcc2671a302a6954d75904ab16d740698e694ea736f36f&"><span>Valorant</span></div>
+</div>
+<div style="padding:0 12px"><b>Produk Paling Digemari</b></div>
+<div class="pcard">
+<div class="price" onclick="beli('ML','Weekly Pass x1','33657')"><span>Weekly Pass - ML</span><b>Rp 33.657</b></div>
+<div class="price" onclick="beli('PUBG','60 UC','18014')"><span>60 UC - PUBG</span><b>Rp 18.014</b></div>
+<div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux - Roblox</span><b>Rp 82.500</b></div>
+<div class="price" onclick="beli('Valorant','475 Points','55300')"><span>475 Points - Valorant</span><b>Rp 55.300</b></div>
+</div>
+<div style="padding:0 12px"><b>Metode Pembayaran</b></div>
+<div class="pcard" style="text-align:center">Via QRIS atau Transfer BCA</div>
+<div class="pcard"><b>Jam Operasional</b><br><b style="color:#5f7cff">08:00 - 22:00 WIB</b></div>
+</div>
+
+<div id="ml" class="hidden content-pad"><h3>Mobile Legends - Lengkap (Harga Jual +10%)</h3><div class="tit">⚡Spesial item ⚡ (Open 8-22 WIB)</div><div class="price" onclick="beli('ML','Weekly Pass x1','33657')"><span>Weekly Pass x1</span><b>Rp 33.657</b></div><div class="price" onclick="beli('ML','Weekly Pass x2','67312')"><span>Weekly Pass x2</span><b>Rp 67.312</b></div><div class="price" onclick="beli('ML','Weekly Pass x3','100968')"><span>Weekly Pass x3</span><b>Rp 100.968</b></div><div class="price" onclick="beli('ML','Weekly Pass x4','134624')"><span>Weekly Pass x4</span><b>Rp 134.624</b></div><div class="price" onclick="beli('ML','Weekly Pass x5','168280')"><span>Weekly Pass x5</span><b>Rp 168.280</b></div><div class="tit">🔥 FIRST TOP UP 🔥</div><div class="price" onclick="beli('ML','50 + 50 Bonus','16999')"><span>50 + 50 Bonus</span><b>Rp 16.999</b></div><div class="price" onclick="beli('ML','150 + 150 Bonus','50835')"><span>150 + 150 Bonus</span><b>Rp 50.835</b></div><div class="price" onclick="beli('ML','250 + 250 Bonus','84838')"><span>250 + 250 Bonus</span><b>Rp 84.838</b></div><div class="price" onclick="beli('ML','500 + 500 Bonus','170640')"><span>500 + 500 Bonus</span><b>Rp 170.640</b></div><div class="tit">⚡ Paling Laris ⚡</div><div class="price" onclick="beli('ML','5 Diamonds','1777')"><span>5 Diamonds (5+0)</span><b>Rp 1.777</b></div><div class="price" onclick="beli('ML','10 Diamonds','3461')"><span>10 Diamonds (10+0)</span><b>Rp 3.461</b></div><div class="price" onclick="beli('ML','28 Diamonds','9479')"><span>28 Diamonds (25+3)</span><b>Rp 9.479</b></div><div class="price" onclick="beli('ML','44 Diamonds','14153')"><span>44 Diamonds (40+4)</span><b>Rp 14.153</b></div><div class="price" onclick="beli('ML','59 Diamonds','18731')"><span>59 Diamonds (53+6)</span><b>Rp 18.731</b></div><div class="price" onclick="beli('ML','85 Diamonds','27053')"><span>85 Diamonds (77+8)</span><b>Rp 27.053</b></div><div class="price" onclick="beli('ML','170 Diamonds','53637')"><span>170 Diamonds (154+16)</span><b>Rp 53.637</b></div><div class="price" onclick="beli('ML','240 Diamonds','75792')"><span>240 Diamonds (217+23)</span><b>Rp 75.792</b></div><div class="price" onclick="beli('ML','296 Diamonds','93841')"><span>296 Diamonds (256+40)</span><b>Rp 93.841</b></div><div class="price" onclick="beli('ML','408 Diamonds','129936')"><span>408 Diamonds (367+41)</span><b>Rp 129.936</b></div><div class="price" onclick="beli('ML','568 Diamonds','177302')"><span>568 Diamonds (503+65)</span><b>Rp 177.302</b></div><div class="price" onclick="beli('ML','2010 Diamonds','594471')"><span>2010 Diamonds (1708+302)</span><b>Rp 594.471</b></div><div class="price" onclick="beli('ML','4830 Diamonds','1417774')"><span>4830 Diamonds (4003+827)</span><b>Rp 1.417.774</b></div><button class="btn" onclick="bk()">Kembali</button></div>
+
+<div id="pb" class="hidden content-pad"><h3>PUBG Mobile - Lengkap (Harga Jual +10%)</h3><div class="price" onclick="beli('PUBG','60 UC','18014')"><span>60 UC</span><b>Rp 18.014</b></div><div class="price" onclick="beli('PUBG','325 (300+25) UC','90467')"><span>325 (300+25) UC</span><b>Rp 90.467</b></div><div class="price" onclick="beli('PUBG','660 (600+60) UC','180934')"><span>660 (600+60) UC</span><b>Rp 180.934</b></div><div class="price" onclick="beli('PUBG','1105 (1020+85) UC','307427')"><span>1105 (1020+85) UC</span><b>Rp 307.427</b></div><div class="price" onclick="beli('PUBG','1500 (1380+120) UC','415906')"><span>1500 (1380+120) UC</span><b>Rp 415.906</b></div><div class="price" onclick="beli('PUBG','1800 (1500+300) UC','452739')"><span>1800 (1500+300) UC</span><b>Rp 452.739</b></div><button class="btn" onclick="bk()">Kembali</button></div>
+
+<div id="rb" class="hidden content-pad"><h3>Roblox - Lengkap (Harga Jual +10% - Via Login)</h3><div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux</span><b>Rp 82.500</b></div><div class="price" onclick="beliRoblox('1000 Robux','165000')"><span>1000 Robux</span><b>Rp 165.000</b></div><div class="price" onclick="beliRoblox('1500 Robux','247500')"><span>1500 Robux</span><b>Rp 247.500</b></div><div class="price" onclick="beliRoblox('2000 Robux','330000')"><span>2000 Robux</span><b>Rp 330.000</b></div><div class="price" onclick="beliRoblox('5000 Robux','825000')"><span>5000 Robux</span><b>Rp 825.000</b></div><div class="price" onclick="beliRoblox('10000 Robux','1650000')"><span>10000 Robux</span><b>Rp 1.650.000</b></div><button class="btn" onclick="bk()">Kembali</button></div>
+
+<div id="vl" class="hidden content-pad"><h3>Valorant</h3><div class="price" onclick="beli('Valorant','475 Points','55300')"><span>475 Points</span><b>Rp 55.300</b></div><div class="price" onclick="beli('Valorant','1000 Points','110700')"><span>1000 Points</span><b>Rp 110.700</b></div><div class="price" onclick="beli('Valorant','1475 Points','166000')"><span>1475 Points</span><b>Rp 166.000</b></div><div class="price" onclick="beli('Valorant','2050 Points','221300')"><span>2050 Points</span><b>Rp 221.300</b></div><div class="price" onclick="beli('Valorant','2525 Points','276700')"><span>2525 Points</span><b>Rp 276.700</b></div><div class="price" onclick="beli('Valorant','3050 Points','332000')"><span>3050 Points</span><b>Rp 332.000</b></div><div class="price" onclick="beli('Valorant','3650 Points','384300')"><span>3650 Points</span><b>Rp 384.300</b></div><div class="price" onclick="beli('Valorant','4125 Points','439600')"><span>4125 Points</span><b>Rp 439.600</b></div><div class="price" onclick="beli('Valorant','4650 Points','495000')"><span>4650 Points</span><b>Rp 495.000</b></div><div class="price" onclick="beli('Valorant','5350 Points','552200')"><span>5350 Points</span><b>Rp 552.200</b></div><div class="price" onclick="beli('Valorant','5700 Points','605600')"><span>5700 Points</span><b>Rp 605.600</b></div><div class="price" onclick="beli('Valorant','5825 Points','607500')"><span>5825 Points</span><b>Rp 607.500</b></div><div class="price" onclick="beli('Valorant','6350 Points','662900')"><span>6350 Points</span><b>Rp 662.900</b></div><div class="price" onclick="beli('Valorant','7300 Points','768600')"><span>7300 Points</span><b>Rp 768.600</b></div><div class="price" onclick="beli('Valorant','7400 Points','773500')"><span>7400 Points</span><b>Rp 773.500</b></div><div class="price" onclick="beli('Valorant','9000 Points','936500')"><span>9000 Points</span><b>Rp 936.500</b></div><div class="price" onclick="beli('Valorant','11000 Points','1085600')"><span>11000 Points</span><b>Rp 1.085.600</b></div><div class="price" onclick="beli('Valorant','11475 Points','1140900')"><span>11475 Points</span><b>Rp 1.140.900</b></div><div class="price" onclick="beli('Valorant','12000 Points','1196300')"><span>12000 Points</span><b>Rp 1.196.300</b></div><div class="price" onclick="beli('Valorant','13050 Points','1306900')"><span>13050 Points</span><b>Rp 1.306.900</b></div><div class="price" onclick="beli('Valorant','14650 Points','1469900')"><span>14650 Points</span><b>Rp 1.469.900</b></div><div class="price" onclick="beli('Valorant','15100 Points','1528300')"><span>15100 Points</span><b>Rp 1.528.300</b></div><div class="price" onclick="beli('Valorant','16350 Points','1637800')"><span>16350 Points</span><b>Rp 1.637.800</b></div><div class="price" onclick="beli('Valorant','16700 Points','1691200')"><span>16700 Points</span><b>Rp 1.691.200</b></div><div class="price" onclick="beli('Valorant','18300 Points','1854200')"><span>18300 Points</span><b>Rp 1.854.200</b></div><div class="price" onclick="beli('Valorant','20000 Points','2022100')"><span>20000 Points</span><b>Rp 2.022.100</b></div><div class="price" onclick="beli('Valorant','22000 Points','2171200')"><span>22000 Points</span><b>Rp 2.171.200</b></div><button class="btn" onclick="bk()">Kembali</button></div>
+
+<div id="form" class="hidden content-pad"><h3 id="fjudul"></h3><div class="pcard" id="formContent"></div></div>
+
+<div id="bayar" class="hidden content-pad"><h3>Pembayaran</h3><div class="pcard" id="bayarInfo"></div><div class="pcard"><b>Scan QRIS (Muncul Pas Mesen):</b><br><img class="qris-img" src="https://cdn.discordapp.com/attachments/1546102069629423690/1548532158434517002/qr_ID1026470412887_13.09.26_1789265292_1789265292396.jpg?ex=6aa76674&is=6aa614f4&hm=faa4dee1390c6e9e99aedf7e2ed2b672b63505861abdf240dce347c87780e63f&"><br><br><b>Atau Transfer BCA:</b><br>No Rek: <b>2832891607</b><br>A.n: <b>Reza Fahlewi Prasetya</b><br><br><button class="btn2" onclick="konfirm()">Konfirmasi & Kirim ke WA Bisnis</button><button class="btn" onclick="bk()">Kembali</button></div></div>
+
+<div id="pesanan" class="hidden content-pad"><h3>Pesanan - Berjalan</h3><div id="listPesanan"></div><button class="btn" onclick="showTab('home')">Kembali</button></div>
+<div id="riwayat" class="hidden content-pad"><h3>Riwayat - Selesai</h3><div id="listRiwayat"></div><button class="btn" onclick="showTab('home')">Kembali</button></div>
+
+<div id="support" class="hidden content-pad"><h3>Support</h3><div class="pcard"><b>Hubungi Kami - RFK STORE</b><br><br>WA Bisnis: 085333403905<br><a href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" style="color:#25D366;font-weight:700;text-decoration:none">Chat WA Bisnis</a><br><br>Discord: c1cii_20<br><a href="https://discordapp.com/users/1546094614908239972" style="color:#5865F2;font-weight:700;text-decoration:none">Add Discord c1cii_20</a><br><br>Jam Operasional: 08:00 - 22:00 WIB<br><small>Buka Setiap Hari - Fast Respon</small></div><button class="btn" onclick="showTab('home')">Kembali</button></div>
+</div>
+
+<div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-support" onclick="showTab('support')">Support</div></div>
+
+<script>
+let tmp={};let orders=JSON.parse(localStorage.getItem('rfk_orders')||'[]');
+function op(id){hideAll();document.getElementById(id).classList.remove('hidden')}
+function bk(){hideAll();document.getElementById('home').classList.remove('hidden');showTab('home')}
+function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')})}
+function showTab(t){hideAll();document.getElementById(t==='home'?'home':t).classList.remove('hidden');document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');if(t==='pesanan')renderPesanan();if(t==='riwayat')renderRiwayat()}
+
+function beli(game,item,price){
+  tmp={game,item,price};
+  document.getElementById('fjudul').innerText=game+' - '+item+' - Rp '+price;
+  let html='';
+  if(game==='ML'){
+    html='<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678"><label>Server *</label><input id="id2" placeholder="Contoh: 9864"><label>Nickname (Opsional)</label><input id="id3" placeholder="Nickname ML"><label>No WA / Username Discord Pembeli * (Wajib)</label><input id="kontak" placeholder="Contoh: 08xx atau c1cii_20"><div class=info>Kontak ini untuk kami hubungi jika ada kendala top-up!</div><div class=info>! Untuk menemukan ID & Server: klik avatar di pojok kiri atas > Info Umum. Contoh: 12345678 (9864)</div><div class=warn>Pastikan Anda mengisi data akun dengan benar.</div><button class=btn2 onclick=goBayarML()>Lanjut ke Pembayaran</button><button class=btn onclick=bk()>Batal</button>';
+  }else if(game==='PUBG'){
+    html='<label>ID PUBG *</label><input id="id1" placeholder="Masukkan ID PUBG"><label>No WA / Username Discord Pembeli * (Wajib)</label><input id="kontak" placeholder="08xx atau Discord username"><div class=warn>Pastikan Anda mengisi data akun dengan benar.</div><button class=btn2 onclick=goBayarSimple()>Lanjut ke Pembayaran</button><button class=btn onclick=bk()>Batal</button>';
+  }else{
+    html='<label>Valorant ID (Riot ID) *</label><input id="id1" placeholder="Contoh: Nama#1234"><label>No WA / Username Discord Pembeli * (Wajib)</label><input id="kontak" placeholder="08xx atau Discord username"><div class=warn>Pastikan Anda mengisi data akun dengan benar.</div><button class=btn2 onclick=goBayarSimple()>Lanjut ke Pembayaran</button><button class=btn onclick=bk()>Batal</button>';
+  }
+  document.getElementById('formContent').innerHTML=html;
+  hideAll();document.getElementById('form').classList.remove('hidden');
+}
+
+function beliRoblox(item,price){
+  let pesan = `Halo RFK STORE, saya mau topup Roblox ${item} dengan harga Rp ${price}%0A%0A`+
+  `Masukkan data akun kalian (*MOHON DIISI DENGAN SANGAT TELITI*)%0A%0A`+
+  `- Username: %0A`+
+  `- Password: %0A`+
+  `- Kode backup yang belum digunakan (minimal 2):%0A`+
+  `- Pilihan Robux: ${item}%0A%0A`+
+  `**Pengerjaan top up robux via login membutuhkan waktu sekitar 15-30 menit, jadi mohon bersabar menunggu ya**`;
+  window.open('https://wa.me/6285333403905?text='+pesan,'_blank');
+}
+
+function goBayarML(){
+  let a=document.getElementById('id1').value;let b=document.getElementById('id2').value;let c=document.getElementById('id3').value;let k=document.getElementById('kontak').value;
+  if(!a||!b){alert('Isi User ID dan Server!');return}
+  if(!k){alert('Isi No WA / Discord kamu! Wajib!');return}
+  tmp.idgame=a+' ('+b+') Nick: '+c;tmp.kontak=k;
+  document.getElementById('bayarInfo').innerHTML='<b>'+tmp.game+'</b> - '+tmp.item+'<br>ID: '+tmp.idgame+'<br>Kontak Pembeli: <b>'+tmp.kontak+'</b><br>Harga: <b>Rp '+tmp.price+'</b>';
+  hideAll();document.getElementById('bayar').classList.remove('hidden');
+}
+function goBayarSimple(){
+  let a=document.getElementById('id1').value;let k=document.getElementById('kontak').value;
+  if(!a){alert('Isi ID dulu!');return}
+  if(!k){alert('Isi No WA / Discord kamu! Wajib!');return}
+  tmp.idgame=a;tmp.kontak=k;
+  document.getElementById('bayarInfo').innerHTML='<b>'+tmp.game+'</b> - '+tmp.item+'<br>ID: '+tmp.idgame+'<br>Kontak Pembeli: <b>'+tmp.kontak+'</b><br>Harga: <b>Rp '+tmp.price+'</b>';
+  hideAll();document.getElementById('bayar').classList.remove('hidden');
+}
+function konfirm(){
+  let order={...tmp,date:new Date().toLocaleString(),status:'berjalan',oid:Date.now()};
+  orders.push(order);localStorage.setItem('rfk_orders',JSON.stringify(orders));
+  let pesan=`*PESANAN BARU - RFK STORE*%0A%0A`+
+  `Game: ${tmp.game}%0A`+
+  `Item: ${tmp.item}%0A`+
+  `Harga: Rp ${tmp.price}%0A`+
+  `ID Game: ${tmp.idgame}%0A`+
+  `Kontak Pembeli: ${tmp.kontak}%0A`+
+  `Waktu: ${order.date}%0A`+
+  `Order ID: ${order.oid}%0A%0A`+
+  `Mohon diproses kak!`;
+  alert('Pesanan berhasil! Akan diarahkan ke WA Bisnis RFK STORE');
+  window.open('https://wa.me/6285333403905?text='+pesan,'_blank');
+  showTab('pesanan');
+}
+function renderPesanan(){let l=document.getElementById('listPesanan');let b=orders.filter(o=>o.status==='berjalan');if(!b.length){l.innerHTML='<div class=pcard>Belum ada pesanan berjalan</div>';return}l.innerHTML=b.map(o=>'<div class=pcard><b>'+o.game+' - '+o.item+'</b><br>ID: '+o.idgame+'<br>Kontak: '+o.kontak+'<br>Rp '+o.price+'<br>'+o.date+'<br><b style=color:#e84393>Berjalan</b><br><button class=btn2 onclick=selesai('+o.oid+')>Selesaikan (Admin)</button></div>').join('')}
+function renderRiwayat(){let l=document.getElementById('listRiwayat');let b=orders.filter(o=>o.status==='selesai');if(!b.length){l.innerHTML='<div class=pcard>Belum ada riwayat</div>';return}l.innerHTML=b.map(o=>'<div class=pcard><b>'+o.game+' - '+o.item+'</b><br>ID: '+o.idgame+'<br>Kontak: '+o.kontak+'<br>Rp '+o.price+'<br>'+o.date+'<br><b style=color:green>Selesai</b></div>').join('')}
+function selesai(id){if(!confirm('Selesaikan?'))return;let o=orders.find(x=>x.oid===id);if(o)o.status='selesai';localStorage.setItem('rfk_orders',JSON.stringify(orders));renderPesanan()}
+</script>
+</body>
+</html>
