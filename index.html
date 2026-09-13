@@ -217,9 +217,8 @@ window.addEventListener('hashchange', () => {
   let h = location.hash.replace('#','') || 'home';
   op(h);
 });
-</script>
-<script>  
-// DARK MODE - JANGAN DIHAPUS LAGI!
+
+  // DARK MODE - JANGAN DIHAPUS LAGI!
 const toggle=document.getElementById('theme-toggle');
 const saved=localStorage.getItem('rfk-theme')||'light';
 document.documentElement.setAttribute('data-theme',saved);
