@@ -43,6 +43,23 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);
 .content-pad{padding:12px}
 @media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr);gap:16px}.kcard img{height:150px}.nav{border-radius:20px;bottom:12px;left:50%;transform:translateX(-50%)}}
 </style>
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo",
+  authDomain: "rfk-store.firebaseapp.com",
+  projectId: "rfk-store",
+  storageBucket: "rfk-store.firebasestorage.app",
+  messagingSenderId: "104621070837",
+  appId: "1:104621070837:web:65dd7268d037a0a9b728bc"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db=db;
+window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy};
+</script>
+<style>.badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}.berjalan{background:orange}.selesai{background:#00c853}</style>
 </head>
 <body>
 <div class="main">
@@ -124,40 +141,50 @@ function goBayarSimple(){
   document.getElementById('bayarInfo').innerHTML='<b>'+tmp.game+'</b> - '+tmp.item+'<br>ID: '+tmp.idgame+'<br>Kontak Pembeli: <b>'+tmp.kontak+'</b><br>Harga: <b>Rp '+tmp.price+'</b>';
   hideAll();document.getElementById('bayar').classList.remove('hidden');
 }
-function konfirm(){
-  let order={...tmp,date:new Date().toLocaleString(),status:'berjalan',oid:Date.now()};
-  orders.push(order);localStorage.setItem('rfk_orders',JSON.stringify(orders));
+async function konfirm(){
+  let order={...tmp,status:'berjalan',waktu:new Date().toLocaleString(),ts:Date.now()};
+  await fs.addDoc(fs.collection(db, "orders"), order);
   let pesan=`*PESANAN BARU - RFK STORE*%0A%0A`+
   `Game: ${tmp.game}%0A`+
   `Item: ${tmp.item}%0A`+
   `Harga: Rp ${tmp.price}%0A`+
   `ID Game: ${tmp.idgame}%0A`+
   `Kontak Pembeli: ${tmp.kontak}%0A`+
-  `Waktu: ${order.date}%0A`+
-  `Order ID: ${order.oid}%0A%0A`+
+  `Waktu: ${order.waktu}%0A`+
+  `Order ID: ${order.ts}%0A%0A`+
   `Mohon diproses kak!`;
-  alert('Pesanan berhasil! Akan diarahkan ke WA Bisnis RFK STORE');
+  alert('Pesanan berhasil! Akan diarahkan ke WA');
   window.open('https://wa.me/6285333403905?text='+pesan,'_blank');
   showTab('pesanan');
 }
+
+fs.onSnapshot(fs.query(fs.collection(db, "orders"), fs.orderBy("ts","desc")), (snap)=>{
+  let all=[];
+  snap.forEach(d=>{ let o=d.data(); o.fbId=d.id; all.push(o); });
+  orders = all;
+  renderPesanan();
+  renderRiwayat();
+});
+
 function renderPesanan(){
   let l=document.getElementById('listPesanan');
-  let b=orders.filter(o=>o.status!=='Selesai');
-  l.innerHTML=b.length?b.map(o=>`<div class=pcard>${o.game} - ${o.item} - Rp ${o.price}<br><small>${o.date}</small><br><button class=btn onclick=selesai(${o.oid})>Tandai Selesai (Admin)</button></div>`).join(''):'<div class=pcard>Belum ada pesanan</div>';
+  let b=orders.filter(o=>o.status=='berjalan');
+  l.innerHTML=b.length?b.map(o=>`<div class=pcard><b>${o.game}</b> - ${o.item}<br>ID: ${o.idgame}<br>Kontak: ${o.kontak}<br>Rp ${o.price}<br><small>${o.waktu}</small><br><br>Status: <span class="badge berjalan">BERJALAN</span><br><button class=btn onclick="selesai('${o.fbId}')">Tandai Selesai (Admin)</button></div>`).join(''):'<div class=pcard>Belum ada pesanan berjalan</div>';
 }
 function renderRiwayat(){
   let l=document.getElementById('listRiwayat');
-  let b=orders.filter(o=>o.status==='Selesai');
-  l.innerHTML=b.length?b.map(o=>`<div class=pcard>${o.game} - ${o.item}<br><small>${o.date} - Selesai</small></div>`).join(''):'<div class=pcard>Belum ada riwayat</div>';
+  let b=orders.filter(o=>o.status=='selesai');
+  l.innerHTML=b.length?b.map(o=>`<div class=pcard><b>${o.game}</b> - ${o.item}<br>ID: ${o.idgame}<br>Rp ${o.price}<br><small>${o.waktu}</small><br><span class="badge selesai">SELESAI</span></div>`).join(''):'<div class=pcard>Belum ada riwayat</div>';
 }
-function selesai(id){
+async function selesai(id){
   let pass=prompt('Masukkan Password Admin:');
-  if(pass!=='rfk123'){alert('Password salah! Hanya admin yang bisa menyelesaikan pesanan.');return}
-  if(!confirm('Selesaikan pesanan ini?')) return;
-  let o=orders.find(x=>x.oid===id);
-  if(o){o.status='Selesai';localStorage.setItem('rfk_orders',JSON.stringify(orders));renderPesanan();renderRiwayat();}
+  if(pass!=='rfk123'){alert('Password salah!');return}
+  if(!confirm('Selesaikan pesanan ini?'))return;
+  await fs.updateDoc(fs.doc(db, "orders", id), {status:'selesai'});
 }
-// DARK MODE
+</script>
+<script>
+// DARK MODE - JANGAN DIHAPUS LAGI!
 const toggle=document.getElementById('theme-toggle');
 const saved=localStorage.getItem('rfk-theme')||'light';
 document.documentElement.setAttribute('data-theme',saved);
