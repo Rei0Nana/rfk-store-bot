@@ -32,8 +32,17 @@ input{width:100%;padding:10px;border-radius:10px;border:1px solid #ffc2d1;margin
 .content-pad{padding:12px}
 @media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr);gap:16px}.kcard img{height:150px}.nav{border-radius:20px;bottom:12px;left:50%;transform:translateX(-50%)}}
 </style>
+<style>
+  :root{--bg:#ff10f5;--text:#111;--card:#fff}
+  [data-theme="dark"]{--bg:#121212;--text:#fff;--card:#1e1e1e}
+  body{background:var(--bg)!important;color:var(--text)!important;transition:.3s}
+  .kcard,.pcard,.header,body{background:var(--card)!important}
+</style>
 </head>
 <body>
+  <body>
+    <button id="theme-toggle" ...>🌙</button>
+    <div class="main"></div>
 <div class="main">
 <div class="header"><img src="https://cdn.discordapp.com/attachments/1546102069629423690/1548534018201489489/IMG-20260913-WA1880.jpg?ex=6aa76830&is=6aa616b0&hm=b4ec35e3f38df3184b0a28e3d7b86bdbab1d4403a5969bb3af0b19bb0f678f19&"><b>RFK STORE</b></div>
 <div id="home">
@@ -119,32 +128,52 @@ function goBayarML(){
   hideAll();document.getElementById('bayar').classList.remove('hidden');
 }
 function goBayarSimple(){
-  let a=document.getElementById('id1').value;let k=document.getElementById('kontak').value;
-  if(!a){alert('Isi ID dulu!');return}
-  if(!k){alert('Isi No WA / Discord kamu! Wajib!');return}
-  tmp.idgame=a;tmp.kontak=k;
-  document.getElementById('bayarInfo').innerHTML='<b>'+tmp.game+'</b> - '+tmp.item+'<br>ID: '+tmp.idgame+'<br>Kontak Pembeli: <b>'+tmp.kontak+'</b><br>Harga: <b>Rp '+tmp.price+'</b>';
-  hideAll();document.getElementById('bayar').classList.remove('hidden');
+let a=document.getElementById('id1').value;let k=document.getElementById('kontak').value;
+if(!a){alert('isi ID dulu!');return}
+if(!k){alert('isi No WA / Discord kamu! Wajib!');return}
+tmp.idgame=a;tmp.kontak=k;
+document.getElementById('bayarInfo').innerHTML='<b>'+tmp.game+'</b> - '+tmp.item+'<br>ID: '+tmp.idgame+'<br>Kontak: '+tmp.kontak;
+hideAll();document.getElementById('bayar').classList.remove('hidden');
 }
 function konfirm(){
-  let order={...tmp,date:new Date().toLocaleString(),status:'berjalan',oid:Date.now()};
-  orders.push(order);localStorage.setItem('rfk_orders',JSON.stringify(orders));
-  let pesan=`*PESANAN BARU - RFK STORE*%0A%0A`+
-  `Game: ${tmp.game}%0A`+
-  `Item: ${tmp.item}%0A`+
-  `Harga: Rp ${tmp.price}%0A`+
-  `ID Game: ${tmp.idgame}%0A`+
-  `Kontak Pembeli: ${tmp.kontak}%0A`+
-  `Waktu: ${order.date}%0A`+
-  `Order ID: ${order.oid}%0A%0A`+
-  `Mohon diproses kak!`;
-  alert('Pesanan berhasil! Akan diarahkan ke WA Bisnis RFK STORE');
-  window.open('https://wa.me/6285333403905?text='+pesan,'_blank');
-  showTab('pesanan');
+let order={...tmp,date:new Date().toLocaleString(),status:'berjalan',oid:Date.now()};
+orders.push(order);localStorage.setItem('rfk_orders',JSON.stringify(orders));
+let pesan=`*PESANAN BARU - RFK STORE*%0A%0A`+
+`Game: ${tmp.game}%0A`+
+`Item: ${tmp.item}%0A`+
+`Harga: Rp ${tmp.price}%0A`+
+`ID Game: ${tmp.idgame}%0A`+
+`Kontak Pembeli: ${tmp.kontak}%0A`+
+`Waktu: ${order.date}%0A`+
+`Order ID: ${order.oid}%0A%0A`+
+'Mohon diproses kak!';
+alert('Pesanan berhasil! Akan diarahkan ke WA Bisnis RFK STORE');
+window.open('https://wa.me/6285333403905?text='+pesan,'_blank');
+showTab('pesanan');
 }
-function renderPesanan(){let l=document.getElementById('listPesanan');let b=orders.filter(o=>o.status==='berjalan');if(!b.length){l.innerHTML='<div class=pcard>Belum ada pesanan berjalan</div>';return}l.innerHTML=b.map(o=>'<div class=pcard><b>'+o.game+' - '+o.item+'</b><br>ID: '+o.idgame+'<br>Kontak: '+o.kontak+'<br>Rp '+o.price+'<br>'+o.date+'<br><b style=color:#e84393>Berjalan</b><br><button class=btn2 onclick=selesai('+o.oid+')>Selesaikan (Admin)</button></div>').join('')}
-function renderRiwayat(){let l=document.getElementById('listRiwayat');let b=orders.filter(o=>o.status==='selesai');if(!b.length){l.innerHTML='<div class=pcard>Belum ada riwayat</div>';return}l.innerHTML=b.map(o=>'<div class=pcard><b>'+o.game+' - '+o.item+'</b><br>ID: '+o.idgame+'<br>Kontak: '+o.kontak+'<br>Rp '+o.price+'<br>'+o.date+'<br><b style=color:green>Selesai</b></div>').join('')}
-function selesai(id){if(!confirm('Selesaikan?'))return;let o=orders.find(x=>x.oid===id);if(o)o.status='selesai';localStorage.setItem('rfk_orders',JSON.stringify(orders));renderPesanan()}
+function renderPesanan(){let l=document.getElementById('listPesanan');let b=orders.filter(o=>o.status!=='Selesai');l.innerHTML=b.length?b.map(o=>`<div>${o.game} - ${o.status}</div>`).join(''):'Belum ada pesanan';}
+function renderRiwayat(){let l=document.getElementById('listRiwayat');let b=orders.filter(o=>o.status==='Selesai');l.innerHTML=b.length?b.map(o=>`<div>${o.game} Selesai</div>`).join(''):'Belum ada riwayat';}
+function selesai(id){
+  if(!confirm('Selesaikan?')) return;
+  let o=orders.find(x=>x.oid===id);
+  if(o){
+    o.status='Selesai';
+    localStorage.setItem('rfk_orders',JSON.stringify(orders));
+    renderPesanan();
+    renderRiwayat();
+  }
+}
+const toggle=document.getElementById('theme-toggle');
+const saved=localStorage.getItem('rfk-theme')||'light';
+document.documentElement.setAttribute('data-theme',saved);
+toggle.textContent=saved==='dark'?'☀️':'🌙';
+toggle.onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('rfk-theme',next);
+  toggle.textContent=next==='dark'?'☀️':'🌙';
+}
 </script>
 </body>
 </html>
