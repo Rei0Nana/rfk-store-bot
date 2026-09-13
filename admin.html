@@ -13,19 +13,21 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 .btn-pink{background:#e84393;color:white}
 .btn-green{background:#00c853;color:white}
 .btn-red{background:#ff3b3b;color:white}
+.btn-yellow{background:#ffb300;color:black}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}
 .berjalan{background:orange}.selesai{background:#00c853}
 .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .stat{background:#231c28;padding:12px;border-radius:12px;text-align:center;border:1px solid #3a2d3f}
 .stat b{font-size:22px;display:block;color:#ff8fab}
 .hidden{display:none}
+.price-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #2e2433}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
 const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy};
+window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy};
 </script>
 </head>
 <body>
@@ -44,6 +46,18 @@ window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, quer
 <div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
 <div class="stat"><b id="totalSelesai">0</b><small>Selesai</small></div>
 </div>
+
+<div class="card">
+<h3>💰 BOT HARGA REALTIME - BARONGSAY</h3>
+<input id="p_game" placeholder="Game: mobile legend">
+<input id="p_item" placeholder="Item: 86 Diamonds">
+<input id="p_harga" type="number" placeholder="Harga Jual: 20000">
+<input id="p_modal" type="number" placeholder="Harga Modal Barongsay (opsional)">
+<button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
+<button class="btn btn-yellow" onclick="syncBarongsay()">🔄 Sync Otomatis dari Barongsay</button>
+<div id="listHarga" style="margin-top:12px"></div>
+</div>
+
 <div class="card">
 <input id="search" placeholder="🔍 Cari ID / Game / Username..." oninput="filter()">
 </div>
@@ -70,6 +84,7 @@ if(localStorage.getItem('rfk-admin')==='true'){
   setTimeout(load,1000);
 }
 function logout(){localStorage.removeItem('rfk-admin');location.reload();}
+
 function load(){
   const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
   window.fs.onSnapshot(q,s=>{
@@ -77,7 +92,9 @@ function load(){
     s.forEach(d=>{allData.push({id:d.id,...d.data()})});
     render(allData);
   });
+  loadHarga();
 }
+
 function render(data){
   let jalan='',selesai='';let cJ=0,cS=0;
   data.forEach(o=>{
@@ -85,29 +102,65 @@ function render(data){
     let card=`<div class="card">
     <b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br>
     <small style="color:#888">${t}</small><br><br>
-    ID Game: <b>${o.id1||'-'}</b> ${o.id2||''}<br>
-    ${o.id3?`Backup/Pass: <b style="color:#ff8fab">${o.id3} ${o.extra||''}</b><br>`:''}
+    ID: <b>${o.id1||'-'}</b> ${o.id2||''}<br>
+    ${o.id3?`Pass: <b style="color:#ff8fab">${o.id3} ${o.extra||''}</b><br>`:''}
     Harga: <b>Rp ${o.price}</b><br>
     Device: <small>${o.deviceId||'-'}</small><br><br>
-    ${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan Pesanan</button>`:''}
+    ${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}
     <button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button>
-    <a href="https://wa.me/6285333403905?text=Halo%20kak%20pesanan%20${o.game}%20${o.item}%20ID%20${o.id1}%20sudah%20selesai%20ya" target="_blank" style="display:block;text-align:center;margin-top:8px;color:#25D366;text-decoration:none;font-weight:700">💬 Chat WA Pembeli</a>
     </div>`;
     if(o.status==='berjalan'){jalan+=card;cJ++;}else{selesai+=card;cS++;}
   });
-  document.getElementById('listJalan').innerHTML=jalan||'<div class=card>Belum ada pesanan berjalan</div>';
-  document.getElementById('listSelesai').innerHTML=selesai||'<div class=card>Belum ada riwayat</div>';
+  document.getElementById('listJalan').innerHTML=jalan||'<div class=card>Kosong</div>';
+  document.getElementById('listSelesai').innerHTML=selesai||'<div class=card>Kosong</div>';
   document.getElementById('totalOrder').innerText=data.length;
   document.getElementById('totalJalan').innerText=cJ;
   document.getElementById('totalSelesai').innerText=cS;
 }
+
+async function updateHarga(){
+  let g=document.getElementById('p_game').value.toLowerCase().trim();
+  let i=document.getElementById('p_item').value.toLowerCase().trim();
+  let h=Number(document.getElementById('p_harga').value);
+  let m=Number(document.getElementById('p_modal').value)||0;
+  if(!g||!i||!h) return alert('Isi Game, Item, Harga!');
+  let id=g+'_'+i.replace(/ /g,'_');
+  await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
+  alert('Berhasil update '+i+' jadi Rp '+h+' REALTIME!');
+  document.getElementById('p_item').value='';document.getElementById('p_harga').value='';
+}
+
+function loadHarga(){
+  window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
+    let html='';
+    s.forEach(d=>{
+      let p=d.data();
+      let untung = p.modal?` (Untung Rp ${p.price-p.modal})`:'';
+      html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} ${untung}</small></span><button onclick="editHarga('${d.id}','${p.game}','${p.item}',${p.price})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
+    });
+    document.getElementById('listHarga').innerHTML=html||'Belum ada harga';
+  });
+}
+
+function editHarga(id,g,i,p){
+  document.getElementById('p_game').value=g;
+  document.getElementById('p_item').value=i;
+  document.getElementById('p_harga').value=p;
+  window.scrollTo(0,0);
+}
+
 function filter(){
   let k=document.getElementById('search').value.toLowerCase();
   let f=allData.filter(o=> JSON.stringify(o).toLowerCase().includes(k));
   render(f);
 }
-async function selesai(id){if(confirm('Selesaikan order ini?'))await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
+async function selesai(id){if(confirm('Selesaikan?'))await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 async function hapus(id){if(confirm('Hapus permanen?'))await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
+
+// BOT BARONGSAY - ganti API KEY lu disini nanti
+async function syncBarongsay(){
+  alert('Untuk sync otomatis Barongsay, lu butuh API KEY Barongsay.\n\nNanti bot bakal auto ambil harga modal + lu set untung otomatis.\n\nKirim API KEY Barongsay lu ke gue, gue bikinin bot auto nya langsung!');
+}
 </script>
 </body>
 </html>
