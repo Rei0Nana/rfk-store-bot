@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN V7 FINAL</title>
+<title>RFK STORE - ADMIN V9 BULAT 500</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -13,6 +13,8 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 .btn-pink{background:#e84393;color:white}
 .btn-green{background:#00c853;color:white}
 .btn-red{background:#ff3b3b;color:white}
+.btn-small{padding:8px 14px;border-radius:20px;background:#3a2d3f;color:white;border:1px solid #4a3d4f;cursor:pointer;font-weight:800;font-size:12px}
+.btn-small.active{background:#e84393;border-color:#e84393}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}
 .berjalan{background:orange}.selesai{background:#00c853}
 .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -25,6 +27,7 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 .tab.active{background:#e84393;color:white}
 .tab .dot{position:absolute;top:-6px;right:-6px;background:#ff3b3b;color:white;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #141018}
 .header{position:sticky;top:0;background:#141018;z-index:10;padding:12px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2e2433;margin:-12px -12px 10px -12px;padding-left:12px;padding-right:12px}
+.preview{background:#141018;border:1px dashed #e84393;border-radius:12px;padding:12px;margin-top:8px;text-align:center}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -63,11 +66,24 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </div>
 
 <div class="card">
-<h3>💰 BOT HARGA - <span id="hargaTitle">ALL</span></h3>
+<h3>💰 BOT HARGA AUTO % - <span id="hargaTitle">ALL</span></h3>
 <input id="p_game" placeholder="Game: ml / pubg / roblox / valorant">
 <input id="p_item" placeholder="Item: 86 Diamonds">
-<input id="p_harga" type="number" placeholder="Harga Jual">
-<input id="p_modal" type="number" placeholder="Modal (opsional)">
+<input id="p_modal" type="number" placeholder="Modal (contoh: 73000)" oninput="hitung()">
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">
+<button class="btn-small" onclick="setPersen(5)">+5%</button>
+<button class="btn-small" onclick="setPersen(10)">+10%</button>
+<button class="btn-small active" onclick="setPersen(15)">+15%</button>
+<button class="btn-small" onclick="setPersen(20)">+20%</button>
+<button class="btn-small" onclick="setPersen(25)">+25%</button>
+<input id="p_persen" type="number" placeholder="Custom %" style="width:90px;margin:0" oninput="hitungCustom()">
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+<input type="checkbox" id="cbBulat" checked style="width:auto" onchange="hitung()">
+<label for="cbBulat" style="font-size:13px">✨ Bulat 500/1000 (83200→83500, 83767→84000)</label>
+</div>
+<div class="preview" id="preview">Masukkan modal dulu...</div>
+<input id="p_harga" type="number" placeholder="Harga Jual Otomatis">
 <button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
 <div id="listHarga" style="margin-top:12px"></div>
 </div>
@@ -81,14 +97,42 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </div>
 
 <div class="card"><input id="search" placeholder="🔍 Cari ID / Game..." oninput="filter()"></div>
-
 <h3 id="titleJalan">🔥 Berjalan - ALL</h3><div id="listJalan"></div>
 <h3 id="titleSelesai">✅ Selesai - ALL</h3><div id="listSelesai"></div>
 </div>
 
 <script>
-let allData=[];let curGame='all';let allPrices=[];
+let allData=[];let curGame='all';let allPrices=[];let curPersen=15;
 function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
+function bulatCantik(n){
+  if(n<=0) return n;
+  let base=Math.floor(n/1000)*1000;
+  let sisa=n%1000;
+  if(sisa===0) return n;
+  if(sisa<=500) return base+500;
+  return base+1000;
+}
+function setPersen(p){
+  curPersen=p;
+  document.getElementById('p_persen').value=p;
+  document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  hitung();
+}
+function hitungCustom(){curPersen=Number(document.getElementById('p_persen').value)||0;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));hitung();}
+function hitung(){
+  let modal=Number(document.getElementById('p_modal').value)||0;
+  let persen=Number(document.getElementById('p_persen').value)||curPersen;
+  let isBulat=document.getElementById('cbBulat').checked;
+  if(!modal){document.getElementById('preview').innerHTML='Masukkan modal dulu...';return;}
+  let jualRaw=modal + Math.round(modal*persen/100);
+  let jual=isBulat?bulatCantik(jualRaw):jualRaw;
+  document.getElementById('p_harga').value=jual;
+  document.getElementById('preview').innerHTML=
+    `Modal ${modal.toLocaleString('id-ID')} + ${persen}% = ${jualRaw.toLocaleString('id-ID')}<br>`+
+    (isBulat?`<b style="color:#ff8fab;font-size:18px">✨ Jadi: Rp ${jual.toLocaleString('id-ID')}</b><br><small style="color:#888">${jualRaw} → ${jual} (${jualRaw%1000} ${jualRaw%1000<=500?'≤500 jadi 500':' >500 jadi 1000'})</small><br>`:`<b style="color:#ff8fab">Rp ${jual.toLocaleString('id-ID')}</b><br>`)+
+    `<small style="color:#00c853">Untung Rp ${(jual-modal).toLocaleString('id-ID')}</small>`;
+}
 async function login(){
   let email=document.getElementById('email').value.trim();
   let pw=document.getElementById('pw').value;
@@ -153,7 +197,20 @@ function render(){
   document.getElementById('totalSelesai').innerText=allData.length-counts.all;
 }
 function filter(){render();}
-async function updateHarga(){let g=document.getElementById('p_game').value.toLowerCase().trim();let i=document.getElementById('p_item').value.toLowerCase().trim();let h=Number(document.getElementById('p_harga').value);let m=Number(document.getElementById('p_modal').value)||0;if(!g||!i||!h)return alert('Isi Game, Item, Harga!');let id=g+'_'+i.replace(/ /g,'_');try{await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});alert('Berhasil update '+i);}catch(e){alert(e.message)}}
+async function updateHarga(){
+  let g=document.getElementById('p_game').value.toLowerCase().trim();
+  let i=document.getElementById('p_item').value.toLowerCase().trim();
+  let h=Number(document.getElementById('p_harga').value);
+  let m=Number(document.getElementById('p_modal').value)||0;
+  let persen=Number(document.getElementById('p_persen').value)||curPersen;
+  if(!g||!i||!h) return alert('Isi Game, Item, Modal!');
+  let id=g+'_'+i.replace(/ /g,'_');
+  try{
+    await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,persen:persen,updated:Date.now()});
+    alert(`Berhasil! ${m} + ${persen}% = Rp ${h}`);
+    document.getElementById('p_modal').value='';document.getElementById('p_harga').value='';document.getElementById('preview').innerHTML='Masukkan modal dulu...';
+  }catch(e){alert(e.message)}
+}
 function loadHarga(){
   window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
     allPrices=[];s.forEach(d=>{allPrices.push({id:d.id,...d.data()})});
@@ -165,14 +222,14 @@ function renderHarga(){
   let filtered = curGame==='all'? allPrices : allPrices.filter(p=>normGame(p.game)===curGame);
   let html='';
   filtered.forEach(p=>{
-    let untung=p.modal?` (Untung Rp ${p.price-p.modal})`:'';
-    html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price}${untung}</small></span><button onclick="editHarga('${p.game}','${p.item}',${p.price})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
+    html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} (modal ${p.modal||'-'})</small></span><button onclick="editHarga('${p.game}','${p.item}',${p.price},${p.modal||0},${p.persen||15})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
   });
   document.getElementById('listHarga').innerHTML=html||'Belum ada harga untuk '+curGame.toUpperCase();
 }
-function editHarga(g,i,p){document.getElementById('p_game').value=g;document.getElementById('p_item').value=i;document.getElementById('p_harga').value=p;window.scrollTo(0,0);}
-async function selesai(id){if(!confirm('Selesaikan?'))return;try{await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai',finishedAt:Date.now()});}catch(e){alert(e.message);}}
-async function hapus(id){if(!confirm('Hapus permanen?'))return;try{await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}catch(e){alert(e.message);}}
+function editHarga(g,i,p,m,per){document.getElementById('p_game').value=g;document.getElementById('p_item').value=i;document.getElementById('p_modal').value=m;document.getElementById('p_persen').value=per;curPersen=per;hitung();window.scrollTo(0,0);}
+async function selesai(id){if(!confirm('Selesaikan?'))return;try{await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}catch(e){alert(e.message);}}
+async function hapus(id){if(!confirm('Hapus?'))return;try{await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}catch(e){alert(e.message);}}
+document.getElementById('p_persen').value=15;
 </script>
 </body>
 </html>
