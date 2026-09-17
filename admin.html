@@ -38,11 +38,11 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div id="login">
 <h2>🔐 RFK STORE ADMIN V2</h2>
 <div class="card">
-<input id="pass" type="password" placeholder="PIN Admin RFK042326">
-<input id="email" type="email" placeholder="Email Admin (natasyareika@gmail.com)" value="natasyareika@gmail.com">
-<input id="pw" type="password" placeholder="Password Firebase Admin">
+<input id="pass" type="password" placeholder="PIN Admin">
+<input id="email" type="email" placeholder="Email Admin">
+<input id="pw" type="password" placeholder="Password">
 <button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
-<small style="color:#888">PIN + Email Firebase harus benar biar bisa Selesaikan pesanan</small>
+<small style="color:#888">Login pakai akun Firebase Admin</small>
 <div id="loginMsg" style="color:#ff8fab;margin-top:8px"></div>
 </div>
 </div>
@@ -87,8 +87,8 @@ async function login(){
   let email = document.getElementById('email').value.trim();
   let pw = document.getElementById('pw').value;
   let msg = document.getElementById('loginMsg');
-  if(pin!=='RFK042326') return msg.innerText='PIN salah! Harus RFK042326';
-  if(!email||!pw) return msg.innerText='Isi email & password Firebase!';
+  if(pin!=='RFK042326') return msg.innerText='PIN salah!';
+  if(!email||!pw) return msg.innerText='Isi email & password!';
   try{
     msg.innerText='Login...';
     let cred = await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
@@ -162,7 +162,7 @@ async function updateHarga(){
   try{
     await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
     alert('Berhasil update '+i+' jadi Rp '+h);
-  }catch(e){alert('Gagal update harga: '+e.message)}
+  }catch(e){alert('Gagal: '+e.message)}
 }
 
 function loadHarga(){
@@ -195,7 +195,7 @@ async function selesai(id){
     await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai', finishedAt: Date.now(), finishedBy: currentAdmin?currentAdmin.email:'admin'});
     alert('✅ Berhasil diselesaikan!');
   }catch(e){
-    alert('❌ Gagal Selesaikan: '+e.message+'\n\nPastikan rules allow update untuk email natasyareika@gmail.com sudah publish!');
+    alert('❌ Gagal: '+e.message);
   }
 }
 async function hapus(id){
