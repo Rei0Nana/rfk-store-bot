@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN V5 PIN 042326</title>
+<title>RFK STORE - ADMIN V7 FINAL</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -20,10 +20,11 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 .stat b{font-size:22px;display:block;color:#ff8fab}
 .hidden{display:none}
 .price-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #2e2433}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0;position:sticky;top:0;background:#141018;z-index:10}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0;position:sticky;top:52px;background:#141018;z-index:9}
 .tab{padding:10px 18px;border-radius:22px;background:#231c28;border:1px solid #3a2d3f;cursor:pointer;white-space:nowrap;font-weight:800;font-size:13px;position:relative}
 .tab.active{background:#e84393;color:white}
 .tab .dot{position:absolute;top:-6px;right:-6px;background:#ff3b3b;color:white;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #141018}
+.header{position:sticky;top:0;background:#141018;z-index:10;padding:12px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2e2433;margin:-12px -12px 10px -12px;padding-left:12px;padding-right:12px}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -50,7 +51,11 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </div>
 
 <div id="dash" class="hidden">
-<h2>📊 Dashboard RFK STORE <small id="adminEmail" style="font-size:11px;color:#888"></small></h2>
+<div class="header">
+<h2 style="margin:0;font-size:16px">📊 RFK STORE<br><small id="adminEmail" style="font-size:10px;color:#888"></small></h2>
+<button onclick="logout()" style="background:#ff3b3b;color:white;border:none;padding:8px 16px;border-radius:20px;font-weight:800;font-size:12px;cursor:pointer">Logout</button>
+</div>
+
 <div class="grid">
 <div class="stat"><b id="totalOrder">0</b><small>Total</small></div>
 <div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
@@ -58,8 +63,8 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </div>
 
 <div class="card">
-<h3>💰 BOT HARGA</h3>
-<input id="p_game" placeholder="Game: mobile legend / pubg / roblox / valorant">
+<h3>💰 BOT HARGA - <span id="hargaTitle">ALL</span></h3>
+<input id="p_game" placeholder="Game: ml / pubg / roblox / valorant">
 <input id="p_item" placeholder="Item: 86 Diamonds">
 <input id="p_harga" type="number" placeholder="Harga Jual">
 <input id="p_modal" type="number" placeholder="Modal (opsional)">
@@ -79,19 +84,18 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 
 <h3 id="titleJalan">🔥 Berjalan - ALL</h3><div id="listJalan"></div>
 <h3 id="titleSelesai">✅ Selesai - ALL</h3><div id="listSelesai"></div>
-
-<button class="btn btn-red" onclick="logout()">Logout</button>
 </div>
 
 <script>
-let allData=[];let curGame='all';
+let allData=[];let curGame='all';let allPrices=[];
+function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
 async function login(){
   let email=document.getElementById('email').value.trim();
   let pw=document.getElementById('pw').value;
   let pin=document.getElementById('pin').value;
   let msg=document.getElementById('loginMsg');
   if(!email||!pw||!pin) return msg.innerText='Isi semua!';
-  if(pin!=='042326') return msg.innerText='PIN salah! Harus 042326';
+  if(pin!=='042326') return msg.innerText='PIN salah!';
   try{
     msg.innerText='Login...';
     let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
@@ -116,15 +120,23 @@ function load(){
   window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});
   loadHarga();
 }
-function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
-function setGame(g){curGame=g;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelector(`.tab[data-game="${g}"]`).classList.add('active');render();}
+function setGame(g){
+  curGame=g;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[data-game="${g}"]`).classList.add('active');
+  document.getElementById('p_game').value = g==='all' ? '' : g;
+  render(); renderHarga();
+}
 function render(){
   let filtered=curGame==='all'?allData:allData.filter(o=>normGame(o.game)===curGame);
   let k=document.getElementById('search').value.toLowerCase();
   if(k)filtered=filtered.filter(o=>JSON.stringify(o).toLowerCase().includes(k));
   let counts={ml:0,pubg:0,roblox:0,valorant:0,all:0};
   allData.forEach(o=>{if(o.status==='berjalan'){counts.all++;let ng=normGame(o.game);if(counts[ng]!==undefined)counts[ng]++;}});
-  ['all','ml','pubg','roblox','valorant'].forEach(key=>{let el=document.getElementById('dot-'+key);el.innerHTML=counts[key]>0?`<span class="dot">${counts[key]}</span>`:'';});
+  ['all','ml','pubg','roblox','valorant'].forEach(key=>{
+    let el=document.getElementById('dot-'+key);
+    el.innerHTML=counts[key]>0?`<span class="dot">${counts[key]}</span>`:'';
+  });
   let jalan='',selesai='',curJ=0,curS=0;
   filtered.forEach(o=>{if(o.status==='berjalan')curJ++;else curS++;});
   filtered.forEach(o=>{
@@ -141,10 +153,26 @@ function render(){
   document.getElementById('totalSelesai').innerText=allData.length-counts.all;
 }
 function filter(){render();}
-async function updateHarga(){let g=document.getElementById('p_game').value.toLowerCase().trim();let i=document.getElementById('p_item').value.toLowerCase().trim();let h=Number(document.getElementById('p_harga').value);if(!g||!i||!h)return alert('Isi Game, Item, Harga!');let id=g+'_'+i.replace(/ /g,'_');try{await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,updated:Date.now()});alert('Berhasil!');}catch(e){alert(e.message)}}
-function loadHarga(){window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{let html='';s.forEach(d=>{let p=d.data();html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small>Rp ${p.price}</small></span></div>`;});document.getElementById('listHarga').innerHTML=html||'Kosong';});}
-async function selesai(id){if(!confirm('Selesaikan?'))return;try{await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}catch(e){alert(e.message);}}
-async function hapus(id){if(!confirm('Hapus?'))return;try{await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}catch(e){alert(e.message);}}
+async function updateHarga(){let g=document.getElementById('p_game').value.toLowerCase().trim();let i=document.getElementById('p_item').value.toLowerCase().trim();let h=Number(document.getElementById('p_harga').value);let m=Number(document.getElementById('p_modal').value)||0;if(!g||!i||!h)return alert('Isi Game, Item, Harga!');let id=g+'_'+i.replace(/ /g,'_');try{await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});alert('Berhasil update '+i);}catch(e){alert(e.message)}}
+function loadHarga(){
+  window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
+    allPrices=[];s.forEach(d=>{allPrices.push({id:d.id,...d.data()})});
+    renderHarga();
+  });
+}
+function renderHarga(){
+  document.getElementById('hargaTitle').innerText=curGame.toUpperCase();
+  let filtered = curGame==='all'? allPrices : allPrices.filter(p=>normGame(p.game)===curGame);
+  let html='';
+  filtered.forEach(p=>{
+    let untung=p.modal?` (Untung Rp ${p.price-p.modal})`:'';
+    html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price}${untung}</small></span><button onclick="editHarga('${p.game}','${p.item}',${p.price})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
+  });
+  document.getElementById('listHarga').innerHTML=html||'Belum ada harga untuk '+curGame.toUpperCase();
+}
+function editHarga(g,i,p){document.getElementById('p_game').value=g;document.getElementById('p_item').value=i;document.getElementById('p_harga').value=p;window.scrollTo(0,0);}
+async function selesai(id){if(!confirm('Selesaikan?'))return;try{await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai',finishedAt:Date.now()});}catch(e){alert(e.message);}}
+async function hapus(id){if(!confirm('Hapus permanen?'))return;try{await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}catch(e){alert(e.message);}}
 </script>
 </body>
 </html>
