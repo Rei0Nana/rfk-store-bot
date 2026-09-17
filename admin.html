@@ -15,7 +15,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f
 .btn-small.active{background:#e84393;border-color:#e84393}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}.berjalan{background:orange}.selesai{background:#00c853}
 .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.stat{background:#231c28;padding:12px;border-radius:12px;text-align:center;border:1px solid #3a2d3f}.stat b{font-size:22px;display:block;color:#ff8fab}
-.hidden{display:none}.price-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #2e2433}
+.hidden{display:none}.price-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #2e2433;gap:8px}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0;position:sticky;top:52px;background:#141018;z-index:9}
 .tab{padding:10px 18px;border-radius:22px;background:#231c28;border:1px solid #3a2d3f;cursor:pointer;white-space:nowrap;font-weight:800;font-size:13px;position:relative}.tab.active{background:#e84393;color:white}
 .header{position:sticky;top:0;background:#141018;z-index:10;padding:12px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2e2433;margin:-12px -12px 10px -12px;padding-left:12px;padding-right:12px}
@@ -78,7 +78,13 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </div>
 <script>
 let allData=[];let curGame='all';let allPrices=[];let curPersen=15;
-const ITEMS={ml:["86 Diamonds","172 Diamonds","257 Diamonds","344 Diamonds","429 Diamonds","514 Diamonds","600 Diamonds","706 Diamonds","878 Diamonds","1050 Diamonds","1412 Diamonds","2195 Diamonds","Twilight Pass","Weekly Diamond Pass"],pubg:["60 UC","325 UC","660 UC","1800 UC","3850 UC","8100 UC"],roblox:["80 Robux","400 Robux","800 Robux","1700 Robux","4500 Robux","10000 Robux"],valorant:["125 VP","420 VP","700 VP","1375 VP","2400 VP","4000 VP","7000 VP"]};
+// ===== CUMA INI YANG GUE LENGKAPIN - SISANYA SAMA =====
+const ITEMS={
+ml:["Weekly Diamond Pass (Event Topup +100)","Weekly Diamond Pass (Event Topup +100) x2","Weekly Diamond Pass (Event Topup +100) x3","Weekly Diamond Pass (Event Topup +100) x4","Weekly Diamond Pass (Event Topup +100) x5","50 + 50 Bonus","150 + 150 Bonus","250 + 250 Bonus","500 + 500 Bonus","5 Diamonds ( 5 + 0 Bonus )","10 Diamonds ( 10 + 0 Bonus )","28 Diamonds ( 25 + 3 Bonus )","44 Diamonds ( 40 + 4 Bonus )","59 Diamonds ( 53 + 6 Bonus )","85 Diamonds ( 77 + 8 Bonus )","170 Diamonds ( 154 + 16 Bonus )","240 Diamonds ( 217 + 23 Bonus )","296 Diamonds ( 256 + 40 Bonus )","408 Diamonds ( 367 + 41 Bonus )","568 Diamonds ( 503 + 65 Bonus )","2010 Diamonds ( 1708 + 302 Bonus )","4830 Diamonds ( 4003 + 827 Bonus )"],
+pubg:["60 UC","325 (300+25) UC","660 (600+60) UC","1105 (1020+85) UC","1500 (1380+120) UC","1800 (1500+300) UC"],
+roblox:["500 Robux","1000 Robux","1500 Robux","2000 Robux","5000 Robux","10.000 Robux"],
+valorant:["475 Points","1000 Points","1475 Points","2050 Points","2525 Points","3050 Points","3650 Points","4125 Points","4650 Points","5350 Points","9000 Points","11000 Points","13050 Points","20000 Points"]
+};
 function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
 function bulatCantik(n){if(n<=0)return n;let base=Math.floor(n/1000)*1000;let sisa=n%1000;if(sisa===0)return n;if(sisa<=500)return base+500;return base+1000;}
 function initSelects(){let g=document.getElementById('p_game');g.innerHTML='<option value="">Pilih Game</option><option value="ml">ML</option><option value="pubg">PUBG</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';onGameChange();}
@@ -124,8 +130,10 @@ function render(){let f=curGame==='all'?allData:allData.filter(o=>normGame(o.gam
 function filter(){render();}
 async function updateHarga(){let g=document.getElementById('p_game').value.toLowerCase().trim();let i=document.getElementById('p_item').value.toLowerCase().trim();let h=Number(document.getElementById('p_harga').value);let m=Number(document.getElementById('p_modal').value)||0;let persen=Number(document.getElementById('p_persen').value)||curPersen;if(!g||!i||!h)return alert('Pilih Game, Item, Modal!');let id=g+'_'+i.replace(/ /g,'_');try{await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,persen:persen,updated:Date.now()});alert(`OK ${m} + ${persen}% = ${h}`);document.getElementById('p_modal').value='';document.getElementById('p_harga').value='';}catch(e){alert(e.message)}}
 function loadHarga(){window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{allPrices=[];s.forEach(d=>{allPrices.push({id:d.id,...d.data()})});renderHarga();onGameChange();});}
-function renderHarga(){let filtered=curGame==='all'?allPrices:allPrices.filter(p=>normGame(p.game)===curGame);let html='';filtered.forEach(p=>{html+=`<div class=price-item><span>${p.game} - ${p.item} Rp ${p.price}</span><button onclick="editHarga('${p.game}','${p.item}',${p.price},${p.modal||0},${p.persen||15})">Edit</button></div>`;});document.getElementById('listHarga').innerHTML=html||'Belum ada';}
+// ===== INI YANG GUE TAMBAHIN TOMBOL HAPUS =====
+function renderHarga(){let filtered=curGame==='all'?allPrices:allPrices.filter(p=>normGame(p.game)===curGame);let html='';filtered.forEach(p=>{html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small>Rp ${p.price} (modal ${p.modal||'-'})</small></span><div style="display:flex;gap:6px"><button onclick="editHarga('${p.game}','${p.item}',${p.price},${p.modal||0},${p.persen||15})" style="padding:6px 10px;border-radius:8px;border:none;background:#3a2d3f;color:white;cursor:pointer">Edit</button><button onclick="hapusHarga('${p.id}')" style="padding:6px 10px;border-radius:8px;border:none;background:#ff3b3b;color:white;cursor:pointer">Hapus</button></div></div>`;});document.getElementById('listHarga').innerHTML=html||'Belum ada';}
 function editHarga(g,i,p,m,per){document.getElementById('p_game').value=g;onGameChange();setTimeout(()=>{document.getElementById('p_item').value=i;document.getElementById('p_modal').value=m;document.getElementById('p_persen').value=per;curPersen=per;hitung();},100);}
+async function hapusHarga(id){if(!confirm('Hapus harga '+id+'? Nanti balik ke harga default HTML'))return;await window.fs.deleteDoc(window.fs.doc(window.db,'prices',id));}
 async function selesai(id){if(!confirm('Selesaikan?'))return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 async function hapus(id){if(!confirm('Hapus?'))return;await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
 document.getElementById('p_persen').value=15;
