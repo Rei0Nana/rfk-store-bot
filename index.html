@@ -56,15 +56,15 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, getDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
 const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
-window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, getDoc, setDoc, where, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail};
+window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, getDoc, setDoc, where, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, updateProfile, updatePassword};
 </script>
 </head>
 <body>
 <div class="main">
-<div class="header"><div class="header-left"><img src="./Logo.jpg"><b>RFK STORE</b></div><div class="h-right"><button id="theme-toggle">🌙</button><button id="loginBtn" onclick="showTab('auth')">🔑 Login</button><span id="userInfo" class="hidden" style="font-size:12px;font-weight:700"></span></div></div>
+<div class="header"><div class="header-left"><img src="./Logo.jpg"><b>RFK STORE</b></div><div class="h-right"><button id="theme-toggle">🌙</button><button id="loginBtn" onclick="showTab('auth')">🔑 Login</button><span id="userInfo" class="hidden" onclick="showTab('profil')" style="font-size:12px;font-weight:700;background:#2a2030;padding:6px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border)"></span></div></div>
 <div id="home">
 <div class="banner"><h2 style="margin:0">Top-Up Game Murah & Cepat</h2><p style="margin:4px 0 0;font-size:12px">Proses Instan - Harga Terbaik</p></div>
 <div class="jam-big"><b>⏰ JAM OPERASIONAL</b><span>08:00 - 22:00 WIB</span><small style="color:#888">Fast Respon di jam kerja!</small></div>
@@ -76,12 +76,7 @@ window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, 
 <div class="kcard" onclick="op('vl')"><img src="./Valorant.jpg"><span>Valorant</span></div>
 </div>
 <div style="padding:0 12px"><b>Produk Paling Digemari</b></div>
-<div class="pcard">
-<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100)','33657')"><span>Weekly Pass - ML</span><b>Rp 33.657</b></div>
-<div class="price" onclick="beliPUBG('PUBG','60 UC','18014')"><span>60 UC - PUBG</span><b>Rp 18.014</b></div>
-<div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux - Roblox</span><b>Rp 82.500</b></div>
-<div class="price" onclick="beliValo('Valorant','475 Points','55300')"><span>475 Points - Valorant</span><b>Rp 55.300</b></div>
-</div>
+<div class="pcard" id="favList">Loading harga dari admin...</div>
 <div style="padding:0 12px"><b>Metode Pembayaran</b></div>
 <div class="pcard" style="text-align:center">Via QRIS atau BCA</div>
 </div>
@@ -112,36 +107,45 @@ window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, 
 <div id="authMsg" style="margin-top:10px;font-size:12px;text-align:center;color:#ff8fab"></div>
 </div>
 </div>
+
+<!-- PROFIL PAGE - KLIK ICON KANAN ATAS -->
+<div id="profil" class="hidden content-pad">
+<button onclick="showTab('home')" style="background:none;border:none;color:#ff8fab;font-weight:800;cursor:pointer;margin-bottom:8px">← Kembali</button>
+<div class="pcard" style="text-align:center">
+<div style="width:70px;height:70px;background:#e84393;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto;color:white">👤</div>
+<b id="profilNama" style="display:block;margin-top:10px;font-size:18px"></b>
+<small id="profilEmail" style="color:#888"></small>
+<div style="text-align:left;margin-top:18px">
+<label class="form-label">Ganti Nama Tampilan</label>
+<input id="newName" placeholder="Nama baru">
+<button class="btn" style="background:#ff8fab" onclick="gantiNama()">💾 Simpan Nama</button>
+
+<label class="form-label" style="margin-top:14px">Ganti Password</label>
+<input id="newPw" type="password" placeholder="Password baru min 6 huruf">
+<button class="btn" style="background:#3a2d3f;color:white" onclick="gantiPw()">🔑 Ganti Password</button>
+
+<hr style="margin:20px 0;border:1px solid var(--border)">
+<button class="btn" style="background:#ff3b3b" onclick="logout()">🚪 Logout Akun</button>
+<div id="profilMsg" style="margin-top:12px;font-size:12px;text-align:center;color:#00c853"></div>
+</div>
+</div>
+</div>
+
 <div id="ml" class="hidden content-pad">
 <h3>MOBILE LEGENDS</h3>
-<div class="tit">⚡Spesial item ⚡</div>
-<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100)','33657')"><span>Weekly Diamond Pass (Event Topup +100)</span><b>Rp 33.657</b></div>
-<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100) x2','67312')"><span>Weekly Diamond Pass (Event Topup +100) x2</span><b>Rp 67.312</b></div>
-<div class="price" onclick="beliML('ML','Weekly Diamond Pass (Event Topup +100) x3','100968')"><span>Weekly Diamond Pass (Event Topup +100) x3</span><b>Rp 100.968</b></div>
-<div class="tit">🔥 FIRST TOP UP 🔥</div>
-<div class="price" onclick="beliML('ML','50 + 50 Bonus','16999')"><span>50 + 50 Bonus</span><b>Rp 16.999</b></div>
-<div class="tit">⚡ Paling Laris ⚡</div>
-<div class="price" onclick="beliML('ML','5 Diamonds ( 5 + 0 Bonus )','1777')"><span>5 Diamonds ( 5 + 0 Bonus )</span><b>Rp 1.777</b></div>
-<div class="price" onclick="beliML('ML','28 Diamonds ( 25 + 3 Bonus )','9479')"><span>28 Diamonds ( 25 + 3 Bonus )</span><b>Rp 9.479</b></div>
-<div class="price" onclick="beliML('ML','85 Diamonds ( 77 + 8 Bonus )','27053')"><span>85 Diamonds ( 77 + 8 Bonus )</span><b>Rp 27.053</b></div>
+<div id="list-ml">Loading harga...</div>
 </div>
 <div id="pb" class="hidden content-pad">
 <h3>PUBG MOBILE</h3>
-<div class="price" onclick="beliPUBG('PUBG','60 UC','18014')"><span>60 UC</span><b>Rp 18.014</b></div>
-<div class="price" onclick="beliPUBG('PUBG','325 (300+25) UC','90467')"><span>325 (300+25) UC</span><b>Rp 90.467</b></div>
-<div class="price" onclick="beliPUBG('PUBG','660 (600+60) UC','180934')"><span>660 (600+60) UC</span><b>Rp 180.934</b></div>
+<div id="list-pb">Loading harga...</div>
 </div>
 <div id="rb" class="hidden content-pad">
 <h3>ROBLOX (VILOG)</h3>
-<div class="price" onclick="beliRoblox('500 Robux','82500')"><span>500 Robux</span><b>Rp 82.500</b></div>
-<div class="price" onclick="beliRoblox('1000 Robux','165000')"><span>1000 Robux</span><b>Rp 165.000</b></div>
-<div class="price" onclick="beliRoblox('1500 Robux','247500')"><span>1500 Robux</span><b>Rp 247.500</b></div>
+<div id="list-rb">Loading harga...</div>
 </div>
 <div id="vl" class="hidden content-pad">
 <h3>Valorant</h3>
-<div class="price" onclick="beliValo('Valorant','475 Points','55300')"><span>475 Points</span><b>Rp 55.300</b></div>
-<div class="price" onclick="beliValo('Valorant','1000 Points','110700')"><span>1000 Points</span><b>Rp 110.700</b></div>
-<div class="price" onclick="beliValo('Valorant','2050 Points','221300')"><span>2050 Points</span><b>Rp 221.300</b></div>
+<div id="list-vl">Loading harga...</div>
 </div>
 <div id="form" class="hidden content-pad"><h3 id="fjudul"></h3><div class="pcard" id="formContent"></div></div>
 <div id="bayar" class="hidden content-pad"><h3>Konfirmasi Pesanan</h3><div class="pcard" id="bayarInfo"></div><div class="pcard" style="text-align:center"><b>Pembayaran: QRIS / BCA</b><br><small style="color:#888">Pilih chat via mana?</small><br><br><button class="btn2 wa-btn" onclick="konfirmWA()">💚 Chat via WhatsApp Bisnis</button><button class="btn2 discord-btn" onclick="konfirmDiscord()">🎮 Chat via Discord</button><button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button></div></div>
@@ -152,10 +156,11 @@ window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, 
 </div>
 <div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-ulasan" onclick="showTab('ulasan')">Ulasan</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-support" onclick="showTab('support')">Support</div></div>
 <script>
-let tmp={};let lastGame='home';let currentUser=null;let currentUsername=null;
+let tmp={};let lastGame='home';let currentUser=null;let currentUsername=null;let allPrices=[];
 let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
-function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);}
-function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home','auth'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
+function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile'))return'ml';if(s.includes('pubg')||s.includes('pb'))return'pb';if(s.includes('roblox')||s.includes('rb')||s.includes('robux'))return'rb';if(s.includes('valo')||s.includes('vl'))return'vl';return'other';}
+function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);renderGameList(id);}
+function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home','auth','profil'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
 function showTab(t){hideAll();let id=t==='home'?'home':t;if(document.getElementById(id))document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));let el=document.getElementById('n-'+t);if(el)el.classList.add('active');if(['ml','pb','rb','vl'].includes(t))lastGame=t;}
 function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');sessionStorage.setItem('rfk-last',lastGame);}
 function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');sessionStorage.setItem('rfk-last',lastGame);}}
@@ -164,6 +169,32 @@ function togglePassLogin(){let i=document.getElementById('loginPassword');i.type
 function togglePassReg(){let i=document.getElementById('regPassword');i.type=i.type==='password'?'text':'password';}
 function togglePassReg2(){let i=document.getElementById('regPassword2');i.type=i.type==='password'?'text':'password';}
 function switchAuth(t){if(t==='login'){document.getElementById('auth-login-view').classList.remove('hidden');document.getElementById('auth-daftar-view').classList.add('hidden');}else{document.getElementById('auth-login-view').classList.add('hidden');document.getElementById('auth-daftar-view').classList.remove('hidden');}sessionStorage.setItem('rfk-last','auth');}
+
+// RENDER HARGA AUTO DARI ADMIN
+function renderGameList(gameId){
+  let map={'ml':'ml','pb':'pubg','rb':'roblox','vl':'valorant'};
+  let firestoreGame=map[gameId];
+  let filtered=allPrices.filter(p=>p.game===firestoreGame || normGame(p.game)===gameId);
+  let container=document.getElementById('list-'+gameId);
+  if(!container) return;
+  if(filtered.length===0){container.innerHTML='<div class=pcard>Belum ada harga, set di admin dulu</div>';return;}
+  let html='';
+  filtered.forEach(p=>{
+    let fn = firestoreGame==='ml'? `beliML('${p.game}','${p.item}','${p.price}')` : firestoreGame==='pubg'? `beliPUBG('${p.game}','${p.item}','${p.price}')` : firestoreGame==='roblox'? `beliRoblox('${p.item}','${p.price}')` : `beliValo('${p.game}','${p.item}','${p.price}')`;
+    html+=`<div class="price" onclick="${fn}"><span>${p.item}</span><b>Rp ${Number(p.price).toLocaleString('id-ID')}</b></div>`;
+  });
+  container.innerHTML=html;
+}
+function renderFav(){
+  let c=document.getElementById('favList');
+  if(allPrices.length===0){c.innerHTML='Belum ada harga';return;}
+  let fav=allPrices.slice(0,4);
+  c.innerHTML=fav.map(p=>{
+    let fn = normGame(p.game)==='ml'? `beliML('${p.game}','${p.item}','${p.price}')` : normGame(p.game)==='pubg'? `beliPUBG('${p.game}','${p.item}','${p.price}')` : normGame(p.game)==='roblox'? `beliRoblox('${p.item}','${p.price}')` : `beliValo('${p.game}','${p.item}','${p.price}')`;
+    return `<div class="price" onclick="${fn}"><span>${p.item} - ${p.game}</span><b>Rp ${Number(p.price).toLocaleString('id-ID')}</b></div>`;
+  }).join('');
+}
+
 function beliML(g,i,p){tmp={game:g,item:i,price:p,type:'ml'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678"><label>Server *</label><input id="id2" placeholder="Contoh: 1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarML()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
 async function goBayarML(){
 const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';
@@ -215,11 +246,57 @@ function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).
 async function daftarUsername(){let nama=document.getElementById('regNama').value.trim();let username=document.getElementById('regUsername').value.trim().toLowerCase();let email=document.getElementById('regEmail').value.trim();let pass=document.getElementById('regPassword').value;let pass2=document.getElementById('regPassword2').value;let msg=document.getElementById('authMsg');if(!nama||!username||!email||!pass||!pass2) return msg.innerText='Masukkan informasi pendaftaran yang valid.';if(username.length<3) return msg.innerText='Username minimal 3 huruf!';if(pass!==pass2) return msg.innerText='Konfirmasi tidak sama!';if(!email.includes('@')) return msg.innerText='Email tidak valid!';try{let check=await window.fs.getDoc(window.fs.doc(window.db,'usernames',username));if(check.exists()) return msg.innerText='Username sudah dipakai!';let cred=await window.fs.createUserWithEmailAndPassword(window.auth,email,pass);await window.fs.setDoc(window.fs.doc(window.db,'usernames',username),{email:email,uid:cred.user.uid,nama:nama,createdAt:Date.now()});await window.fs.setDoc(window.fs.doc(window.db,'users',cred.user.uid),{username:username,email:email,nama:nama,createdAt:Date.now()});msg.innerText='Daftar sukses!';showTab('home');}catch(e){msg.innerText=e.message;}}
 async function loginUsername(){let username=document.getElementById('loginUsername').value.trim().toLowerCase();let pass=document.getElementById('loginPassword').value;let msg=document.getElementById('authMsg');if(!username||!pass)return msg.innerText='Isi username & kata sandi!';try{let emailToUse=username;if(!username.includes('@')){let snap=await window.fs.getDoc(window.fs.doc(window.db,'usernames',username));if(!snap.exists())return msg.innerText='Username tidak ditemukan!';emailToUse=snap.data().email;}await window.fs.signInWithEmailAndPassword(window.auth,emailToUse,pass);msg.innerText='Login sukses!';showTab('home');}catch(e){msg.innerText='Username/kata sandi salah!';}}
 async function lupaPass(){let email=prompt('Masukkan email:');if(!email)return;try{await window.fs.sendPasswordResetEmail(window.auth,email);alert('Link reset dikirim ke: '+email);}catch(e){alert(e.message);}}
-async function logout(){await window.fs.signOut(window.auth);currentUsername=null;sessionStorage.removeItem('rfk-last');showTab('home');}
+async function logout(){if(!confirm('Yakin mau logout?'))return;await window.fs.signOut(window.auth);currentUsername=null;sessionStorage.removeItem('rfk-last');showTab('home');location.reload();}
+
+// PROFIL FUNGSI
+async function loadProfil(){
+  if(!currentUser) return;
+  document.getElementById('profilNama').innerText=currentUser.displayName||currentUsername||currentUser.email;
+  document.getElementById('profilEmail').innerText=currentUser.email;
+  document.getElementById('newName').value=currentUser.displayName||currentUsername||'';
+}
+async function gantiNama(){
+  let n=document.getElementById('newName').value.trim();
+  if(!n) return alert('Isi nama!');
+  try{
+    await window.fs.updateProfile(window.auth.currentUser,{displayName:n});
+    if(currentUser) await window.fs.updateDoc(window.fs.doc(window.db,'users',currentUser.uid),{nama:n,username:n.toLowerCase().replace(/\s+/g,'')});
+    document.getElementById('profilMsg').innerText='✅ Nama berhasil diganti jadi '+n;
+    currentUsername=n;
+    document.getElementById('userInfo').innerText='👤 '+n;
+  }catch(e){alert(e.message);}
+}
+async function gantiPw(){
+  let p=document.getElementById('newPw').value;
+  if(p.length<6) return alert('Password minimal 6 huruf!');
+  if(!confirm('Ganti password?')) return;
+  try{
+    await window.fs.updatePassword(window.auth.currentUser,p);
+    document.getElementById('profilMsg').innerText='✅ Password berhasil diganti!';
+    document.getElementById('newPw').value='';
+  }catch(e){alert('Gagal: '+e.message+' - Coba logout login ulang dulu');}
+}
+
 let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput.star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}setStar(5);
 async function kirimUlasan(){let nama=document.getElementById('namaUlasan').value||'Anonim';let komen=document.getElementById('komentarUlasan').value;if(!komen) return alert('Tulis komentar dulu!');await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya! ⭐');}
 setTimeout(()=>{try{
-window.fs.onAuthStateChanged(window.auth,async(user)=>{currentUser=user;let btn=document.getElementById('loginBtn');let info=document.getElementById('userInfo');let out=document.getElementById('logoutBtn');if(user){let uDoc=await window.fs.getDoc(window.fs.doc(window.db,'users',user.uid));currentUsername=uDoc.exists()?uDoc.data().username:user.email.split('@')[0];btn.classList.add('hidden');info.classList.remove('hidden');info.innerText='👤 '+currentUsername;out.classList.remove('hidden');}else{btn.classList.remove('hidden');info.classList.add('hidden');out.classList.add('hidden');currentUsername=null;}});
+window.fs.onAuthStateChanged(window.auth,async(user)=>{
+  currentUser=user;let btn=document.getElementById('loginBtn');let info=document.getElementById('userInfo');let out=document.getElementById('logoutBtn');
+  if(user){
+    let uDoc=await window.fs.getDoc(window.fs.doc(window.db,'users',user.uid));
+    currentUsername=uDoc.exists()?uDoc.data().username:user.email.split('@')[0];
+    if(uDoc.exists() && uDoc.data().nama) currentUsername=uDoc.data().nama;
+    btn.classList.add('hidden');info.classList.remove('hidden');info.innerText='👤 '+currentUsername;
+    if(out) out.classList.remove('hidden');
+  }else{
+    btn.classList.remove('hidden');info.classList.add('hidden');if(out) out.classList.add('hidden');currentUsername=null;
+  }
+});
+// Load harga otomatis dari admin
+window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
+  allPrices=[];s.forEach(d=>allPrices.push({id:d.id,...d.data()}));
+  renderFav();['ml','pb','rb','vl'].forEach(g=>renderGameList(g));
+});
 const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
 window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let isMine=false;if(currentUser){if(o.uid===currentUser.uid||o.deviceId===deviceId)isMine=true;}else{if(o.deviceId===deviceId)isMine=true;}if(!isMine)return;let tgl=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>📅 ${tgl} | 👤 ${o.username||'guest'} | 🆔 ${o.id1||''}</small><br><b>Rp ${o.price}</b></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
 const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
