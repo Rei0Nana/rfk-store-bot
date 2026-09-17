@@ -13,7 +13,8 @@ body{background:var(--bg);margin:0;font-family:sans-serif;color:var(--text);padd
 .header-left{display:flex;align-items:center;gap:10px}
 .header img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:white;border:1px solid var(--border)}
 .header b{color:#e84393;font-size:22px}
-#theme-toggle{background:var(--card);border:1px solid var(--border);border-radius:99px;width:40px;height:40px;font-size:18px;cursor:pointer}
+.h-right{display:flex;align-items:center;gap:8px}
+#theme-toggle,#loginBtn{background:var(--card);border:1px solid var(--border);border-radius:99px;height:40px;padding:0 14px;font-size:13px;cursor:pointer;font-weight:700}
 .main{max-width:1100px;margin:0 auto}
 .banner{margin:12px;background:linear-gradient(135deg,#ff8fab,#ffb3c6);border-radius:18px;padding:18px;color:white}
 .jam-big{margin:0 12px 12px;background:var(--card);border:2px dashed #ff8fab;border-radius:16px;padding:14px;text-align:center;box-shadow:0 3px 10px var(--shadow)}
@@ -41,24 +42,30 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(-
 .warn{border:1.5px solid #ff3b3b;color:#ff3b3b;background:#fff0f0;border-radius:20px;padding:8px 12px;font-size:11px;text-align:center;margin-top:10px;font-weight:600}
 .content-pad{padding:12px}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}.berjalan{background:orange}.selesai{background:#00c853}
-.admin-only{display:none}.is-admin .admin-only{display:block!important}
+.admin-only{display:none}.is-admin.admin-only{display:block!important}
 .support-card{text-align:center;padding:20px 14px}
 .support-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:14px;font-weight:800;text-decoration:none;margin:10px 0;font-size:14px}
 .wa-btn{background:#25D366;color:white}.discord-btn{background:#5865F2;color:white}
 .star{font-size:26px;cursor:pointer;color:#ddd}.star.active{color:#ffc107}
 .review-card{border-bottom:1px solid var(--border);padding:10px 0}
+.daftar-title{font-size:28px;font-weight:900;margin:0 0 4px;color:#fff}
+.daftar-sub{color:#aaa;font-size:14px;margin-bottom:18px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-label{font-size:13px;font-weight:700;margin:12px 0 4px;display:block;color:#bbb}
+.dark-input{background:#2a2a2e!important;border-color:#3a3a3e!important;color:#fff!important}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
-const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy};
+const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
+window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, getDoc, setDoc, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail};
 </script>
 </head>
 <body>
 <div class="main">
-<div class="header"><div class="header-left"><img src="./Logo.jpg"><b>RFK STORE</b></div><button id="theme-toggle">🌙</button></div>
+<div class="header"><div class="header-left"><img src="./Logo.jpg"><b>RFK STORE</b></div><div class="h-right"><button id="theme-toggle">🌙</button><button id="loginBtn" onclick="showTab('auth')">🔑 Login</button><span id="userInfo" class="hidden" style="font-size:12px;font-weight:700"></span></div></div>
 <div id="home">
 <div class="banner"><h2 style="margin:0">Top-Up Game Murah & Cepat</h2><p style="margin:4px 0 0;font-size:12px">Proses Instan - Harga Terbaik</p></div>
 <div class="jam-big"><b>⏰ JAM OPERASIONAL</b><span>08:00 - 22:00 WIB</span><small style="color:#888">Fast Respon di jam kerja!</small></div>
@@ -78,6 +85,33 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 </div>
 <div style="padding:0 12px"><b>Metode Pembayaran</b></div>
 <div class="pcard" style="text-align:center">Via QRIS atau BCA</div>
+</div>
+<div id="auth" class="hidden content-pad">
+<div class="pcard" style="max-width:520px;margin:10px auto;background:#18181b;border:none;color:#fff">
+<div id="auth-login-view">
+<div class="daftar-title">Masuk</div><div class="daftar-sub">Masukkan username dan kata sandi kamu.</div>
+<label class="form-label">Username</label><input id="loginUsername" placeholder="Username" class="dark-input">
+<label class="form-label">Kata sandi</label><div class="pass-wrap"><input id="loginPassword" type="password" placeholder="Kata sandi" class="dark-input"><button class="eye-btn" onclick="togglePassLogin()">👁️</button></div>
+<button class="btn2" style="background:#ff8fab;color:white;margin-top:16px" onclick="loginUsername()">Masuk</button>
+<div style="text-align:center;margin-top:12px;font-size:13px;color:#888">Belum punya akun? <span style="color:#ff8fab;font-weight:700;cursor:pointer" onclick="switchAuth('daftar')">Daftar</span> • <span style="color:#ff8fab;cursor:pointer" onclick="lupaPass()">Lupa password?</span></div>
+</div>
+<div id="auth-daftar-view" class="hidden">
+<div class="daftar-title">Daftar</div><div class="daftar-sub">Masukkan informasi pendaftaran yang valid.</div>
+<div class="form-row">
+<div><label class="form-label">Nama lengkap</label><input id="regNama" placeholder="Nama lengkap" class="dark-input"></div>
+<div><label class="form-label">Username</label><input id="regUsername" placeholder="Username" class="dark-input"></div>
+</div>
+<label class="form-label">Alamat email</label><input id="regEmail" placeholder="Alamat email" class="dark-input">
+<div class="form-row">
+<div><label class="form-label">Kata sandi</label><div class="pass-wrap"><input id="regPassword" type="password" placeholder="Kata sandi" class="dark-input"><button class="eye-btn" onclick="togglePassReg()">👁️</button></div></div>
+<div><label class="form-label">Konfirmasi kata sandi</label><div class="pass-wrap"><input id="regPassword2" type="password" placeholder="Konfirmasi kata sandi" class="dark-input"><button class="eye-btn" onclick="togglePassReg2()">👁️</button></div></div>
+</div>
+<button class="btn2" style="background:#ff8fab;color:white;margin-top:18px" onclick="daftarUsername()">Daftar</button>
+<div style="text-align:center;margin-top:12px;font-size:13px;color:#888">Sudah punya akun? <span style="color:#ff8fab;font-weight:700;cursor:pointer" onclick="switchAuth('login')">Masuk</span></div>
+</div>
+<button class="btn-batal hidden" id="logoutBtn" onclick="logout()" style="color:#fff;border-color:#3a3a3e;margin-top:12px">Logout</button>
+<div id="authMsg" style="margin-top:10px;font-size:12px;text-align:center;color:#ff8fab"></div>
+</div>
 </div>
 <div id="ml" class="hidden content-pad">
 <h3>MOBILE LEGENDS</h3>
@@ -143,176 +177,91 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div class="price" onclick="beliValo('Valorant','20000 Points','2022100')"><span>20000 Points</span><b>Rp 2.022.100</b></div>
 </div>
 <div id="form" class="hidden content-pad"><h3 id="fjudul"></h3><div class="pcard" id="formContent"></div></div>
-<div id="bayar" class="hidden content-pad">
-<h3>Konfirmasi Pesanan</h3>
-<div class="pcard" id="bayarInfo"></div>
-<div class="pcard" style="text-align:center">
-<b>Pembayaran: QRIS / BCA</b><br><small style="color:#888">Pilih chat via mana?</small><br><br>
-<button class="btn2 wa-btn" onclick="konfirmWA()">💚 Chat via WhatsApp Bisnis</button>
-<button class="btn2 discord-btn" onclick="konfirmDiscord()">🎮 Chat via Discord</button>
-<button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button>
-</div>
-</div>
+<div id="bayar" class="hidden content-pad"><h3>Konfirmasi Pesanan</h3><div class="pcard" id="bayarInfo"></div><div class="pcard" style="text-align:center"><b>Pembayaran: QRIS / BCA</b><br><small style="color:#888">Pilih chat via mana?</small><br><br><button class="btn2 wa-btn" onclick="konfirmWA()">💚 Chat via WhatsApp Bisnis</button><button class="btn2 discord-btn" onclick="konfirmDiscord()">🎮 Chat via Discord</button><button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button></div></div>
 <div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan</h3><div id="listPesanan"></div></div>
 <div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai</h3><div id="listRiwayat"></div></div>
-<div id="ulasan" class="hidden content-pad">
-<h3>⭐ Ulasan Pelanggan</h3>
-<div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div>
-<div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div>
-<div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div>
-</div>
-<div id="support" class="hidden content-pad">
-<h3>Support</h3>
-<div class="pcard support-card"><div style="font-size:42px">💬</div><b>Butuh Bantuan?</b><br><small style="color:#888">Admin Online 08:00 - 22:00 WIB</small><br><br><a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a><a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a></div>
-</div>
+<div id="ulasan" class="hidden content-pad"><h3>⭐ Ulasan Pelanggan</h3><div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div><div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div><div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div></div>
+<div id="support" class="hidden content-pad"><h3>Support</h3><div class="pcard support-card"><div style="font-size:42px">💬</div><b>Butuh Bantuan?</b><br><small style="color:#888">Admin Online 08:00 - 22:00 WIB</small><br><br><a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a><a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a></div></div>
 </div>
 <div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-ulasan" onclick="showTab('ulasan')">Ulasan</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-support" onclick="showTab('support')">Support</div></div>
 <script>
-let tmp={};let lastGame='home';let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
+let tmp={};let lastGame='home';let currentUser=null;let currentUsername=null;
+let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
 const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='RFK042326'){localStorage.setItem('rfk-admin','true');alert('Mode Admin Aktif RFK042326');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
 function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);}
-function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
-function showTab(t){hideAll();let id=t==='home'?'home':t;document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));document.getElementById('n-'+t).classList.add('active');}
-function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');}
-function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');}}
-function beliML(g,i,p){
-tmp={game:g,item:i,price:p,type:'ml'};
-document.getElementById('fjudul').innerText=g+' - '+i;
-document.getElementById('formContent').innerHTML=`
-<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678">
-<label>Server *</label><input id="id2" placeholder="Contoh: 1234">
-<button class=btn2 style="background:#ff8fab" onclick=goBayarML()>Lanjut Pilih Chat 💬</button>
-<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
-hideAll();document.getElementById('form').classList.remove('hidden');
-}
+function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home','auth'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
+function showTab(t){hideAll();let id=t==='home'?'home':t;if(document.getElementById(id))document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));let el=document.getElementById('n-'+t);if(el)el.classList.add('active');if(['ml','pb','rb','vl'].includes(t))lastGame=t;}
+function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');sessionStorage.setItem('rfk-last',lastGame);}
+function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');sessionStorage.setItem('rfk-last',lastGame);}}
+function togglePass(){let inp=document.getElementById('id2');let btn=document.getElementById('eyeBtn');if(!inp)return;if(inp.type==='password'){inp.type='text';btn.innerText='🙈';}else{inp.type='password';btn.innerText='👁️';}}
+function togglePassLogin(){let i=document.getElementById('loginPassword');i.type=i.type==='password'?'text':'password';}
+function togglePassReg(){let i=document.getElementById('regPassword');i.type=i.type==='password'?'text':'password';}
+function togglePassReg2(){let i=document.getElementById('regPassword2');i.type=i.type==='password'?'text':'password';}
+function switchAuth(t){if(t==='login'){document.getElementById('auth-login-view').classList.remove('hidden');document.getElementById('auth-daftar-view').classList.add('hidden');}else{document.getElementById('auth-login-view').classList.add('hidden');document.getElementById('auth-daftar-view').classList.remove('hidden');}sessionStorage.setItem('rfk-last','auth');}
+function beliML(g,i,p){tmp={game:g,item:i,price:p,type:'ml'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678"><label>Server *</label><input id="id2" placeholder="Contoh: 1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarML()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
 async function goBayarML(){
 const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';
 if(!id1) return alert('User ID wajib!');if(!id2) return alert('Server wajib!');
-tmp={...tmp,id1,id2,status:'berjalan',deviceId,createdAt:Date.now()};
+let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data sudah benar ya:\n\nGame: ${tmp.game}\nItem: ${tmp.item}\nHarga: Rp ${tmp.price}\nUser ID: ${id1}\nServer: ${id2}\n\nJika salah, silahkan klik Batal.\nLanjut ke pembayaran?`);
+if(!ok) return;
+tmp={...tmp,id1,id2,status:'berjalan',deviceId,uid:currentUser?currentUser.uid:null,username:currentUsername,createdAt:Date.now()};
 document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>User ID: ${id1}<br>Server: ${id2}`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');
+hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
 try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
 }
-function beliPUBG(g,i,p){
-tmp={game:g,item:i,price:p,type:'pubg'};
-document.getElementById('fjudul').innerText=g+' - '+i;
-document.getElementById('formContent').innerHTML=`
-<label>PUBG ID *</label><input id="id1" placeholder="Contoh: 5123456789">
-<button class=btn2 style="background:#ff8fab" onclick=goBayarPUBG()>Lanjut Pilih Chat 💬</button>
-<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
-hideAll();document.getElementById('form').classList.remove('hidden');
-}
+function beliPUBG(g,i,p){tmp={game:g,item:i,price:p,type:'pubg'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>PUBG ID *</label><input id="id1" placeholder="Contoh: 5123456789"><button class=btn2 style="background:#ff8fab" onclick=goBayarPUBG()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
 async function goBayarPUBG(){
-const id1=document.getElementById('id1')?.value.trim()||'';if(!id1) return alert('PUBG ID wajib!');
-tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,createdAt:Date.now()};
-document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>PUBG ID: ${id1}`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');
-try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
-}
-function beliValo(g,i,p){
-tmp={game:g,item:i,price:p,type:'valo'};
-document.getElementById('fjudul').innerText=g+' - '+i;
-document.getElementById('formContent').innerHTML=`
-<label>Valorant ID *</label><input id="id1" placeholder="Contoh: Nama#1234">
-<button class=btn2 style="background:#ff8fab" onclick=goBayarValo()>Lanjut Pilih Chat 💬</button>
-<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
-hideAll();document.getElementById('form').classList.remove('hidden');
-}
-async function goBayarValo(){
-const id1=document.getElementById('id1')?.value.trim()||'';if(!id1) return alert('Valorant ID wajib!');
-tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,createdAt:Date.now()};
-document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Valorant ID: ${id1}`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');
-try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
-}
-// ==== ROBLOX VILOG + LIHAT PASSWORD ====
-function togglePass(){
-  let inp = document.getElementById('id2');
-  let btn = document.getElementById('eyeBtn');
-  if(inp.type==='password'){ inp.type='text'; btn.innerText='🙈'; }
-  else { inp.type='password'; btn.innerText='👁️'; }
-}
-function beliRoblox(i,p){
-tmp={game:'Roblox',item:i,price:p,type:'roblox'};
-document.getElementById('fjudul').innerText='Roblox - '+i+' (Via Login)';
-document.getElementById('formContent').innerHTML=`
-<label>Username: *</label><input id="id1" placeholder="Username Roblox">
-<label>Password: *</label>
-<div class="pass-wrap">
-<input id="id2" type="password" placeholder="Password Roblox">
-<button type="button" id="eyeBtn" class="eye-btn" onclick="togglePass()">👁️</button>
-</div>
-<label>Kode backup yang belum digunakan (minimal 2): *</label>
-<textarea id="id3" rows="5" placeholder="Tempel minimal 2 kode, contoh:
-a1b2c3d4
-e5f6g7h8
-pisahkan per baris"></textarea>
-<div class="warn" style="border-radius:10px;text-align:left;line-height:1.4">
-🔐 Via Login Wajib:<br>
-- Akun harus sudah aktif 2-Step Verification<br>
-- Masukkan minimal 2 kode backup yang BELUM dipakai<br>
-- 1 kode = 1 baris
-</div>
-<button class=btn2 style="background:#ff8fab;color:white" onclick=goBayarRoblox()>Lanjut Pilih Chat 💬</button>
-<button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;
-hideAll();document.getElementById('form').classList.remove('hidden');
-}
-async function goBayarRoblox(){
 const id1=document.getElementById('id1')?.value.trim()||'';
-const id2=document.getElementById('id2')?.value.trim()||'';
-const id3=document.getElementById('id3')?.value.trim()||'';
-if(!id1) return alert('Username wajib diisi!');
-if(!id2) return alert('Password wajib diisi!');
-if(!id3) return alert('Kode backup wajib minimal 2!');
-let codes = id3.split(/[\n,]+/).map(s=>s.trim()).filter(s=>s.length>=3);
-if(codes.length < 2) return alert('Minimal 2 kode backup yang belum digunakan!\\nPisahkan per baris ya.');
-tmp={...tmp,id1,id2,id3,status:'berjalan',deviceId,createdAt:Date.now(),codeCount:codes.length};
-document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Username: ${id1}<br>Password: ••••••<br>Kode Backup: ${codes.length} kode valid`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');
+if(!id1) return alert('PUBG ID wajib!');
+let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data sudah benar ya:\n\nGame: ${tmp.game}\nItem: ${tmp.item}\nHarga: Rp ${tmp.price}\nPUBG ID: ${id1}\n\nLanjut ke pembayaran?`);
+if(!ok) return;
+tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,uid:currentUser?currentUser.uid:null,username:currentUsername,createdAt:Date.now()};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>PUBG ID: ${id1}`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
 try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
 }
-function getPesan(){
-if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUser ID: ${tmp.id1}\nServer: ${tmp.id2}`;
-if(tmp.type==='pubg') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nPUBG ID: ${tmp.id1}`;
-if(tmp.type==='valo') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nValorant ID: ${tmp.id1}`;
-if(tmp.type==='roblox') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUsername: ${tmp.id1}\nPassword: ${tmp.id2}\nKode Backup (${tmp.codeCount||2} kode): ${tmp.id3}`;
-return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nID: ${tmp.id1} ${tmp.id2||''} ${tmp.id3||''}`;
+function beliValo(g,i,p){tmp={game:g,item:i,price:p,type:'valo'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>Valorant ID *</label><input id="id1" placeholder="Contoh: Nama#1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarValo()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
+async function goBayarValo(){
+const id1=document.getElementById('id1')?.value.trim()||'';
+if(!id1) return alert('Valorant ID wajib!');
+let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data sudah benar ya:\n\nGame: ${tmp.game}\nItem: ${tmp.item}\nHarga: Rp ${tmp.price}\nValorant ID: ${id1}\n\nLanjut ke pembayaran?`);
+if(!ok) return;
+tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,uid:currentUser?currentUser.uid:null,username:currentUsername,createdAt:Date.now()};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Valorant ID: ${id1}`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
+try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
 }
+function beliRoblox(i,p){tmp={game:'Roblox',item:i,price:p,type:'roblox'};document.getElementById('fjudul').innerText='Roblox - '+i+' (Via Login)';document.getElementById('formContent').innerHTML=`<label>Username: *</label><input id="id1" placeholder="Username Roblox"><label>Password: *</label><div class="pass-wrap"><input id="id2" type="password" placeholder="Password Roblox"><button type="button" id="eyeBtn" class="eye-btn" onclick="togglePass()">👁️</button></div><label>Kode backup yang belum digunakan (minimal 2): *</label><textarea id="id3" rows="5" placeholder="Tempel minimal 2 kode"></textarea><div class="warn" style="border-radius:10px;text-align:left;line-height:1.4">🔐 Via Login Wajib:<br>- Akun harus sudah aktif 2-Step Verification<br>- Minimal 2 kode backup BELUM dipakai</div><button class=btn2 style="background:#ff8fab;color:white" onclick=goBayarRoblox()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
+async function goBayarRoblox(){
+const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';const id3=document.getElementById('id3')?.value.trim()||'';
+if(!id1) return alert('Username wajib!');if(!id2) return alert('Password wajib!');if(!id3) return alert('Kode backup wajib minimal 2!');
+let codes = id3.split(/[\n,]+/).map(s=>s.trim()).filter(s=>s.length>=3);if(codes.length < 2) return alert('Minimal 2 kode backup!');
+let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data Roblox sudah benar, jika salah robux bisa nyasar!\n\nItem: ${tmp.item}\nHarga: Rp ${tmp.price}\nUsername: ${id1}\nPassword: ${id2}\nKode Backup: ${codes.length} kode\n\nLanjut ke pembayaran?`);
+if(!ok) return;
+tmp={...tmp,id1,id2,id3,status:'berjalan',deviceId,uid:currentUser?currentUser.uid:null,username:currentUsername,createdAt:Date.now(),codeCount:codes.length};
+document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Username: ${id1}<br>Kode: ${codes.length} kode valid`;
+hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
+try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){}
+}
+function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUser ID: ${tmp.id1}\nServer: ${tmp.id2}`;if(tmp.type==='pubg') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nPUBG ID: ${tmp.id1}`;if(tmp.type==='valo') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nValorant ID: ${tmp.id1}`;if(tmp.type==='roblox') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUsername: ${tmp.id1}\nPassword: ${tmp.id2}\nKode Backup (${tmp.codeCount||2} kode): ${tmp.id3}`;return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nID: ${tmp.id1} ${tmp.id2||''} ${tmp.id3||''}`;}
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
-function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya besti!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
-let selectedStar=5;
-function setStar(n){selectedStar=n;document.querySelectorAll('#starInput .star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}
-setStar(5);
-async function kirimUlasan(){
-let nama=document.getElementById('namaUlasan').value||'Anonim';
-let komen=document.getElementById('komentarUlasan').value;
-if(!komen) return alert('Tulis komentar dulu!');
-await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});
-document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya besti! ⭐');
-}
+function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
+async function daftarUsername(){let nama=document.getElementById('regNama').value.trim();let username=document.getElementById('regUsername').value.trim().toLowerCase();let email=document.getElementById('regEmail').value.trim();let pass=document.getElementById('regPassword').value;let pass2=document.getElementById('regPassword2').value;let msg=document.getElementById('authMsg');if(!nama||!username||!email||!pass||!pass2) return msg.innerText='Masukkan informasi pendaftaran yang valid.';if(username.length<3) return msg.innerText='Username minimal 3 huruf!';if(pass!==pass2) return msg.innerText='Konfirmasi kata sandi tidak sama!';if(!email.includes('@')) return msg.innerText='Alamat email tidak valid!';try{let check=await window.fs.getDoc(window.fs.doc(window.db,'usernames',username));if(check.exists()) return msg.innerText='Username sudah dipakai!';let cred=await window.fs.createUserWithEmailAndPassword(window.auth,email,pass);await window.fs.setDoc(window.fs.doc(window.db,'usernames',username),{email:email,uid:cred.user.uid,nama:nama,createdAt:Date.now()});await window.fs.setDoc(window.fs.doc(window.db,'users',cred.user.uid),{username:username,email:email,nama:nama,createdAt:Date.now()});msg.innerText='Daftar sukses!';showTab('home');}catch(e){msg.innerText=e.message;}}
+async function loginUsername(){let username=document.getElementById('loginUsername').value.trim().toLowerCase();let pass=document.getElementById('loginPassword').value;let msg=document.getElementById('authMsg');if(!username||!pass)return msg.innerText='Isi username & kata sandi!';try{let emailToUse=username;if(!username.includes('@')){let snap=await window.fs.getDoc(window.fs.doc(window.db,'usernames',username));if(!snap.exists())return msg.innerText='Username tidak ditemukan!';emailToUse=snap.data().email;}await window.fs.signInWithEmailAndPassword(window.auth,emailToUse,pass);msg.innerText='Login sukses!';showTab('home');}catch(e){msg.innerText='Username/kata sandi salah!';}}
+async function lupaPass(){let email=prompt('Masukkan alamat email kamu:');if(!email)return;try{await window.fs.sendPasswordResetEmail(window.auth,email);alert('Link reset dikirim ke: '+email);}catch(e){alert(e.message);}}
+async function logout(){await window.fs.signOut(window.auth);currentUsername=null;sessionStorage.removeItem('rfk-last');showTab('home');}
+let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput.star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}setStar(5);
+async function kirimUlasan(){let nama=document.getElementById('namaUlasan').value||'Anonim';let komen=document.getElementById('komentarUlasan').value;if(!komen) return alert('Tulis komentar dulu!');await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya! ⭐');}
 setTimeout(()=>{try{
+window.fs.onAuthStateChanged(window.auth,async(user)=>{currentUser=user;let btn=document.getElementById('loginBtn');let info=document.getElementById('userInfo');let out=document.getElementById('logoutBtn');if(user){let uDoc=await window.fs.getDoc(window.fs.doc(window.db,'users',user.uid));currentUsername=uDoc.exists()?uDoc.data().username:user.email.split('@')[0];btn.classList.add('hidden');info.classList.remove('hidden');info.innerText='👤 '+currentUsername;out.classList.remove('hidden');}else{btn.classList.remove('hidden');info.classList.add('hidden');out.classList.add('hidden');currentUsername=null;}});
 const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
-window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;if(!isAdmin&&o.deviceId!==deviceId)return;let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>${o.id1} ${o.id2||''} ${(o.id3||'').substring(0,30)}...</small><br>Rp ${o.price}<br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
+window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;let isMine=false;if(currentUser){if(o.uid===currentUser.uid||o.deviceId===deviceId)isMine=true;}else{if(o.deviceId===deviceId)isMine=true;}if(isAdmin)isMine=true;if(!isMine)return;let tgl=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>📅 ${tgl} | 👤 ${o.username||'guest'} | 🆔 ${o.id1||''}</small><br><b>Rp ${o.price}</b><br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
 const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
-window.fs.onSnapshot(q2,s=>{
-let html='';let total=0,count=0;
-s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});
-document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';
-if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}
-});
+window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
 }catch(e){}},1500);
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
-window.addEventListener('DOMContentLoaded',()=>{
-let last = sessionStorage.getItem('rfk-last');
-if(last && document.getElementById(last)){
-hideAll();document.getElementById(last).classList.remove('hidden');
-if(last!=='home'){lastGame=last;}
-showTab(last);
-} else {
-showTab('home');
-}
-});
+window.addEventListener('DOMContentLoaded',()=>{let last = sessionStorage.getItem('rfk-last');if(last && document.getElementById(last)){hideAll();document.getElementById(last).classList.remove('hidden');if(last!=='home'){lastGame=last;}showTab(last);} else {showTab('home');}});
 </script>
 </body>
 </html>
