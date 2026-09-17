@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN PANEL</title>
+<title>RFK STORE - ADMIN PANEL V2</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -25,22 +25,30 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
-const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy};
+const app = initializeApp(firebaseConfig); 
+const db = getFirestore(app);
+const auth = getAuth(app);
+window.db=db; window.auth=auth;
+window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy, signInWithEmailAndPassword, onAuthStateChanged, signOut};
 </script>
 </head>
 <body>
 <div id="login">
-<h2>🔐 RFK STORE ADMIN</h2>
+<h2>🔐 RFK STORE ADMIN V2</h2>
 <div class="card">
-<input id="pass" type="password" placeholder="Masukkan Password Admin">
+<input id="pass" type="password" placeholder="PIN Admin RFK042326">
+<input id="email" type="email" placeholder="Email Admin (natasyareika@gmail.com)" value="natasyareika@gmail.com">
+<input id="pw" type="password" placeholder="Password Firebase Admin">
 <button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
+<small style="color:#888">PIN + Email Firebase harus benar biar bisa Selesaikan pesanan</small>
+<div id="loginMsg" style="color:#ff8fab;margin-top:8px"></div>
 </div>
 </div>
 
 <div id="dash" class="hidden">
-<h2>📊 Dashboard RFK STORE</h2>
+<h2>📊 Dashboard RFK STORE <small id="adminEmail" style="font-size:12px;color:#888"></small></h2>
 <div class="grid">
 <div class="stat"><b id="totalOrder">0</b><small>Total Order</small></div>
 <div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
@@ -49,13 +57,11 @@ window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setD
 
 <div class="card">
 <h3>💰 BOT HARGA REALTIME</h3>
-<small style="color:#888">Update harga langsung realtime ke web pembeli!</small><br><br>
 <input id="p_game" placeholder="Game: mobile legend / pubg / roblox / valorant">
 <input id="p_item" placeholder="Item: 86 Diamonds">
 <input id="p_harga" type="number" placeholder="Harga Jual">
 <input id="p_modal" type="number" placeholder="Modal Barongsay (opsional)">
 <button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
-<button class="btn btn-yellow" onclick="syncBarongsay()">🔄 Sync Barongsay</button>
 <div id="listHarga" style="margin-top:12px"></div>
 </div>
 
@@ -74,20 +80,44 @@ window.db=db; window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setD
 
 <script>
 let allData=[];
-function login(){
-  if(document.getElementById('pass').value==='RFK042326'){
+let currentAdmin=null;
+
+async function login(){
+  let pin = document.getElementById('pass').value;
+  let email = document.getElementById('email').value.trim();
+  let pw = document.getElementById('pw').value;
+  let msg = document.getElementById('loginMsg');
+  if(pin!=='RFK042326') return msg.innerText='PIN salah! Harus RFK042326';
+  if(!email||!pw) return msg.innerText='Isi email & password Firebase!';
+  try{
+    msg.innerText='Login...';
+    let cred = await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
     localStorage.setItem('rfk-admin','true');
+    msg.innerText='Berhasil!';
     document.getElementById('login').classList.add('hidden');
     document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('adminEmail').innerText='👤 '+cred.user.email;
     load();
-  }else alert('Password salah!');
+  }catch(e){
+    msg.innerText='Gagal: '+e.message;
+  }
 }
-if(localStorage.getItem('rfk-admin')==='true'){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
-  setTimeout(load,1000);
+
+window.fs.onAuthStateChanged(window.auth,(user)=>{
+  if(user && localStorage.getItem('rfk-admin')==='true'){
+    currentAdmin=user;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('adminEmail').innerText='👤 '+user.email;
+    load();
+  }
+});
+
+function logout(){ 
+  window.fs.signOut(window.auth);
+  localStorage.removeItem('rfk-admin');
+  location.reload();
 }
-function logout(){localStorage.removeItem('rfk-admin');location.reload();}
 
 function load(){
   const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
@@ -105,9 +135,9 @@ function render(data){
     let t=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID'):'-';
     let card=`<div class="card">
     <b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br>
-    <small style="color:#888">${t}</small><br><br>
+    <small style="color:#888">${t} | ${o.username||'guest'} | ${o.email||''}</small><br><br>
     ID: <b>${o.id1||'-'}</b> ${o.id2||''}<br>
-    ${o.id3?`Backup: <b style="color:#ff8fab">${o.id3}</b><br>`:''}
+    ${o.id3?`Backup: <b style="color:#ff8fab">${o.id3.substring(0,40)}...</b><br>`:''}
     Harga: <b>Rp ${o.price}</b><br>
     Device: <small>${o.deviceId||'-'}</small><br><br>
     ${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}
@@ -129,9 +159,10 @@ async function updateHarga(){
   let m=Number(document.getElementById('p_modal').value)||0;
   if(!g||!i||!h) return alert('Isi Game, Item, Harga!');
   let id=g+'_'+i.replace(/ /g,'_');
-  await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
-  alert('Berhasil update '+i+' jadi Rp '+h);
-  document.getElementById('p_item').value='';document.getElementById('p_harga').value='';
+  try{
+    await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
+    alert('Berhasil update '+i+' jadi Rp '+h);
+  }catch(e){alert('Gagal update harga: '+e.message)}
 }
 
 function loadHarga(){
@@ -158,10 +189,20 @@ function filter(){
   let f=allData.filter(o=> JSON.stringify(o).toLowerCase().includes(k));
   render(f);
 }
-async function selesai(id){if(confirm('Selesaikan pesanan ini?'))await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
-async function hapus(id){if(confirm('Hapus permanen?'))await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
-function syncBarongsay(){
-  alert('Kirim API KEY Barongsay lu ke gue besti!');
+async function selesai(id){
+  if(!confirm('Selesaikan pesanan ini?')) return;
+  try{
+    await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai', finishedAt: Date.now(), finishedBy: currentAdmin?currentAdmin.email:'admin'});
+    alert('✅ Berhasil diselesaikan!');
+  }catch(e){
+    alert('❌ Gagal Selesaikan: '+e.message+'\n\nPastikan rules allow update untuk email natasyareika@gmail.com sudah publish!');
+  }
+}
+async function hapus(id){
+  if(!confirm('Hapus permanen?')) return;
+  try{
+    await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));
+  }catch(e){ alert('Gagal hapus: '+e.message) }
 }
 </script>
 </body>
