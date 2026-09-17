@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN V10 ITEM PILIH</title>
+<title>RFK STORE - ADMIN V12 SESSION</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -32,12 +32,12 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-setPersistence(auth, browserLocalPersistence);
+setPersistence(auth, browserSessionPersistence);
 window.db=db; window.auth=auth;
 window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy, signInWithEmailAndPassword, onAuthStateChanged, signOut};
 </script>
@@ -111,55 +111,12 @@ const ITEMS={
   valorant:["125 VP","420 VP","700 VP","1375 VP","2400 VP","4000 VP","7000 VP"]
 };
 function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
-function bulatCantik(n){
-  if(n<=0) return n;
-  let base=Math.floor(n/1000)*1000;
-  let sisa=n%1000;
-  if(sisa===0) return n;
-  if(sisa<=500) return base+500;
-  return base+1000;
-}
-function initSelects(){
-  let gameSel=document.getElementById('p_game');
-  gameSel.innerHTML='<option value="">-- Pilih Game --</option><option value="ml">Mobile Legend</option><option value="pubg">PUBG Mobile</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';
-  onGameChange();
-}
-function onGameChange(){
-  let g=document.getElementById('p_game').value;
-  let itemSel=document.getElementById('p_item');
-  if(!g){itemSel.innerHTML='<option value="">-- Pilih Game Dulu --</option>';return;}
-  let list=ITEMS[g]||[];
-  let custom=allPrices.filter(p=>normGame(p.game)===g).map(p=>p.item);
-  let merged=[...new Set([...list,...custom])];
-  itemSel.innerHTML='<option value="">-- Pilih Item --</option>'+merged.map(it=>`<option value="${it}">${it}</option>`).join('')+'<option value="__custom">+ Item Baru (ketik manual)</option>';
-  hitung();
-}
-function setPersen(p){
-  curPersen=p;
-  document.getElementById('p_persen').value=p;
-  document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
-  hitung();
-}
+function bulatCantik(n){if(n<=0) return n;let base=Math.floor(n/1000)*1000;let sisa=n%1000;if(sisa===0) return n;if(sisa<=500) return base+500;return base+1000;}
+function initSelects(){let gameSel=document.getElementById('p_game');gameSel.innerHTML='<option value="">-- Pilih Game --</option><option value="ml">Mobile Legend</option><option value="pubg">PUBG Mobile</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';onGameChange();}
+function onGameChange(){let g=document.getElementById('p_game').value;let itemSel=document.getElementById('p_item');if(!g){itemSel.innerHTML='<option value="">-- Pilih Game Dulu --</option>';return;}let list=ITEMS[g]||[];let custom=allPrices.filter(p=>normGame(p.game)===g).map(p=>p.item);let merged=[...new Set([...list,...custom])];itemSel.innerHTML='<option value="">-- Pilih Item --</option>'+merged.map(it=>`<option value="${it}">${it}</option>`).join('')+'<option value="__custom">+ Item Baru (ketik manual)</option>';hitung();}
+function setPersen(p){curPersen=p;document.getElementById('p_persen').value=p;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');hitung();}
 function hitungCustom(){curPersen=Number(document.getElementById('p_persen').value)||0;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));hitung();}
-function hitung(){
-  let itemEl=document.getElementById('p_item');
-  if(itemEl.value==='__custom'){
-    let custom=prompt('Nama Item Baru: (contoh: 1000 Diamonds)');
-    if(custom){let opt=document.createElement('option');opt.value=custom;opt.text=custom;itemEl.add(opt, itemEl.options[itemEl.options.length-1]);itemEl.value=custom;}
-  }
-  let modal=Number(document.getElementById('p_modal').value)||0;
-  let persen=Number(document.getElementById('p_persen').value)||curPersen;
-  let isBulat=document.getElementById('cbBulat').checked;
-  if(!modal){document.getElementById('preview').innerHTML='Masukkan modal dulu...';return;}
-  let jualRaw=modal + Math.round(modal*persen/100);
-  let jual=isBulat?bulatCantik(jualRaw):jualRaw;
-  document.getElementById('p_harga').value=jual;
-  document.getElementById('preview').innerHTML=
-    `Modal ${modal.toLocaleString('id-ID')} + ${persen}% = ${jualRaw.toLocaleString('id-ID')}<br>`+
-    (isBulat?`<b style="color:#ff8fab;font-size:18px">✨ Jadi: Rp ${jual.toLocaleString('id-ID')}</b><br><small style="color:#888">${jualRaw} → ${jual}</small><br>`:`<b style="color:#ff8fab">Rp ${jual.toLocaleString('id-ID')}</b><br>`)+
-    `<small style="color:#00c853">Untung Rp ${(jual-modal).toLocaleString('id-ID')}</small>`;
-}
+function hitung(){let itemEl=document.getElementById('p_item');if(itemEl.value==='__custom'){let custom=prompt('Nama Item Baru: (contoh: 1000 Diamonds)');if(custom){let opt=document.createElement('option');opt.value=custom;opt.text=custom;itemEl.add(opt, itemEl.options[itemEl.options.length-1]);itemEl.value=custom;}}let modal=Number(document.getElementById('p_modal').value)||0;let persen=Number(document.getElementById('p_persen').value)||curPersen;let isBulat=document.getElementById('cbBulat').checked;if(!modal){document.getElementById('preview').innerHTML='Masukkan modal dulu...';return;}let jualRaw=modal + Math.round(modal*persen/100);let jual=isBulat?bulatCantik(jualRaw):jualRaw;document.getElementById('p_harga').value=jual;document.getElementById('preview').innerHTML=`Modal ${modal.toLocaleString('id-ID')} + ${persen}% = ${jualRaw.toLocaleString('id-ID')}<br>`+(isBulat?`<b style="color:#ff8fab;font-size:18px">✨ Jadi: Rp ${jual.toLocaleString('id-ID')}</b><br><small style="color:#888">${jualRaw} → ${jual}</small><br>`:`<b style="color:#ff8fab">Rp ${jual.toLocaleString('id-ID')}</b><br>`)+`<small style="color:#00c853">Untung Rp ${(jual-modal).toLocaleString('id-ID')}</small>`;}
 async function login(){
   let email=document.getElementById('email').value.trim();
   let pw=document.getElementById('pw').value;
@@ -169,26 +126,23 @@ async function login(){
   if(pin!=='042326') return msg.innerText='PIN salah!';
   try{
     msg.innerText='Login...';
-    let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
-    localStorage.setItem('rfk-admin','true');
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
-    document.getElementById('adminEmail').innerText='👤 '+cred.user.email;
-    load();
+    await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
+    sessionStorage.setItem('rfk-admin','true');
+    msg.innerText='Berhasil!';
   }catch(e){msg.innerText='Gagal: '+e.message;}
 }
 window.fs.onAuthStateChanged(window.auth,(user)=>{
-  if(user && localStorage.getItem('rfk-admin')==='true'){
+  if(user && sessionStorage.getItem('rfk-admin')==='true'){
     document.getElementById('login').classList.add('hidden');
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('adminEmail').innerText='👤 '+user.email;
     load();
-  } else if(!user){
+  } else {
     document.getElementById('login').classList.remove('hidden');
     document.getElementById('dash').classList.add('hidden');
   }
 });
-function logout(){window.fs.signOut(window.auth);localStorage.removeItem('rfk-admin');location.reload();}
+function logout(){window.fs.signOut(window.auth);sessionStorage.removeItem('rfk-admin');location.reload();}
 function load(){
   const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
   window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});
