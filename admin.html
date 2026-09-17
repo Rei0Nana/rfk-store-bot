@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN V12 SESSION</title>
+<title>RFK STORE - ADMIN V14 FINAL</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -42,7 +42,8 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </script>
 </head>
 <body>
-<div id="login">
+<div id="loading" style="text-align:center;padding:30px;color:#888">Memuat admin...</div>
+<div id="login" class="hidden">
 <h2>🔐 LOGIN ADMIN</h2>
 <div class="card">
 <input id="email" type="email" placeholder="Email Admin">
@@ -110,6 +111,7 @@ function onGameChange(){let g=document.getElementById('p_game').value;let itemSe
 function setPersen(p){curPersen=p;document.getElementById('p_persen').value=p;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');hitung();}
 function hitungCustom(){curPersen=Number(document.getElementById('p_persen').value)||0;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));hitung();}
 function hitung(){let itemEl=document.getElementById('p_item');if(itemEl.value==='__custom'){let custom=prompt('Nama Item Baru: (contoh: 1000 Diamonds)');if(custom){let opt=document.createElement('option');opt.value=custom;opt.text=custom;itemEl.add(opt, itemEl.options[itemEl.options.length-1]);itemEl.value=custom;}}let modal=Number(document.getElementById('p_modal').value)||0;let persen=Number(document.getElementById('p_persen').value)||curPersen;let isBulat=document.getElementById('cbBulat').checked;if(!modal){document.getElementById('preview').innerHTML='Masukkan modal dulu...';return;}let jualRaw=modal + Math.round(modal*persen/100);let jual=isBulat?bulatCantik(jualRaw):jualRaw;document.getElementById('p_harga').value=jual;document.getElementById('preview').innerHTML=`Modal ${modal.toLocaleString('id-ID')} + ${persen}% = ${jualRaw.toLocaleString('id-ID')}<br>`+(isBulat?`<b style="color:#ff8fab;font-size:18px">✨ Jadi: Rp ${jual.toLocaleString('id-ID')}</b><br><small style="color:#888">${jualRaw} → ${jual}</small><br>`:`<b style="color:#ff8fab">Rp ${jual.toLocaleString('id-ID')}</b><br>`)+`<small style="color:#00c853">Untung Rp ${(jual-modal).toLocaleString('id-ID')}</small>`;}
+
 async function login(){
   let email=document.getElementById('email').value.trim();
   let pw=document.getElementById('pw').value;
@@ -121,24 +123,49 @@ async function login(){
     msg.innerText='Login...';
     let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
     sessionStorage.setItem('rfk-admin','true');
+    localStorage.setItem('rfk-admin','true');
+    document.getElementById('loading').classList.add('hidden');
     document.getElementById('login').classList.add('hidden');
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('adminEmail').innerText='👤 '+cred.user.email;
     load();
   }catch(e){msg.innerText='Gagal: '+e.message;}
 }
+
+let authChecked=false;
 window.fs.onAuthStateChanged(window.auth,(user)=>{
-  if(user && sessionStorage.getItem('rfk-admin')==='true'){
+  authChecked=true;
+  document.getElementById('loading').classList.add('hidden');
+  let isAdmin = sessionStorage.getItem('rfk-admin')==='true' || localStorage.getItem('rfk-admin')==='true';
+  if(user && isAdmin){
+    sessionStorage.setItem('rfk-admin','true');
     document.getElementById('login').classList.add('hidden');
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('adminEmail').innerText='👤 '+user.email;
     load();
-  } else if(!user){
+  } else {
     document.getElementById('login').classList.remove('hidden');
     document.getElementById('dash').classList.add('hidden');
   }
 });
-function logout(){window.fs.signOut(window.auth);sessionStorage.removeItem('rfk-admin');location.reload();}
+
+// kalau firebase lama restore, jangan diem di loading terus
+setTimeout(()=>{
+  if(!authChecked){
+    document.getElementById('loading').classList.add('hidden');
+    let isAdmin = sessionStorage.getItem('rfk-admin')==='true' || localStorage.getItem('rfk-admin')==='true';
+    if(window.auth.currentUser && isAdmin){
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('dash').classList.remove('hidden');
+      document.getElementById('adminEmail').innerText='👤 '+window.auth.currentUser.email;
+      load();
+    } else {
+      document.getElementById('login').classList.remove('hidden');
+    }
+  }
+},1200);
+
+function logout(){window.fs.signOut(window.auth);sessionStorage.removeItem('rfk-admin');localStorage.removeItem('rfk-admin');location.reload();}
 function load(){
   const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
   window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});
