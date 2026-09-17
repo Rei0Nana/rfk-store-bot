@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN PANEL V2</title>
+<title>RFK STORE - ADMIN V4 PER GAME</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -13,7 +13,6 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 .btn-pink{background:#e84393;color:white}
 .btn-green{background:#00c853;color:white}
 .btn-red{background:#ff3b3b;color:white}
-.btn-yellow{background:#ffb300;color:black}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:white;font-weight:700}
 .berjalan{background:orange}.selesai{background:#00c853}
 .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -21,6 +20,10 @@ input{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f;backgr
 .stat b{font-size:22px;display:block;color:#ff8fab}
 .hidden{display:none}
 .price-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #2e2433}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0;position:sticky;top:0;background:#141018;z-index:10}
+.tab{padding:10px 18px;border-radius:22px;background:#231c28;border:1px solid #3a2d3f;cursor:pointer;white-space:nowrap;font-weight:800;font-size:13px;position:relative}
+.tab.active{background:#e84393;color:white;border-color:#e84393}
+.tab .dot{position:absolute;top:-6px;right:-6px;background:#ff3b3b;color:white;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;padding:2px 5px;border:2px solid #141018}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -65,22 +68,29 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div id="listHarga" style="margin-top:12px"></div>
 </div>
 
+<div class="tabs">
+<div class="tab active" data-game="all" onclick="setGame('all')">ALL <span id="dot-all"></span></div>
+<div class="tab" data-game="ml" onclick="setGame('ml')">ML <span id="dot-ml"></span></div>
+<div class="tab" data-game="pubg" onclick="setGame('pubg')">PUBG <span id="dot-pubg"></span></div>
+<div class="tab" data-game="roblox" onclick="setGame('roblox')">ROBLOX <span id="dot-roblox"></span></div>
+<div class="tab" data-game="valorant" onclick="setGame('valorant')">VALORANT <span id="dot-valorant"></span></div>
+</div>
+
 <div class="card">
 <input id="search" placeholder="🔍 Cari ID / Game / Username..." oninput="filter()">
 </div>
 
-<h3>🔥 Pesanan Berjalan</h3>
+<h3 id="titleJalan">🔥 Pesanan Berjalan - ALL</h3>
 <div id="listJalan"></div>
 
-<h3>✅ Riwayat Selesai</h3>
+<h3 id="titleSelesai">✅ Riwayat Selesai - ALL</h3>
 <div id="listSelesai"></div>
 
 <button class="btn btn-red" onclick="logout()">Logout Admin</button>
 </div>
 
 <script>
-let allData=[];
-let currentAdmin=null;
+let allData=[];let currentAdmin=null;let curGame='all';
 
 async function login(){
   let pin = document.getElementById('pass').value;
@@ -93,16 +103,12 @@ async function login(){
     msg.innerText='Login...';
     let cred = await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
     localStorage.setItem('rfk-admin','true');
-    msg.innerText='Berhasil!';
     document.getElementById('login').classList.add('hidden');
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('adminEmail').innerText='👤 '+cred.user.email;
     load();
-  }catch(e){
-    msg.innerText='Gagal: '+e.message;
-  }
+  }catch(e){msg.innerText='Gagal: '+e.message;}
 }
-
 window.fs.onAuthStateChanged(window.auth,(user)=>{
   if(user && localStorage.getItem('rfk-admin')==='true'){
     currentAdmin=user;
@@ -112,46 +118,57 @@ window.fs.onAuthStateChanged(window.auth,(user)=>{
     load();
   }
 });
-
-function logout(){ 
-  window.fs.signOut(window.auth);
-  localStorage.removeItem('rfk-admin');
-  location.reload();
-}
-
+function logout(){window.fs.signOut(window.auth);localStorage.removeItem('rfk-admin');location.reload();}
 function load(){
   const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
-  window.fs.onSnapshot(q,s=>{
-    allData=[];
-    s.forEach(d=>{allData.push({id:d.id,...d.data()})});
-    render(allData);
-  });
+  window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});
   loadHarga();
 }
+function normGame(g){
+  let s=(g||'').toLowerCase();
+  if(s.includes('ml')||s.includes('mobile')||s.includes('legend')) return 'ml';
+  if(s.includes('pubg')) return 'pubg';
+  if(s.includes('roblox')||s.includes('robux')) return 'roblox';
+  if(s.includes('valo')||s.includes('valorant')) return 'valorant';
+  return 'other';
+}
+function setGame(g){
+  curGame=g;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[data-game="${g}"]`).classList.add('active');
+  render();
+}
+function render(){
+  let filtered = curGame==='all'? allData : allData.filter(o=>normGame(o.game)===curGame || normGame(o.item)===curGame || (o.game||'').toLowerCase().includes(curGame));
+  let k=document.getElementById('search').value.toLowerCase();
+  if(k) filtered = filtered.filter(o=>JSON.stringify(o).toLowerCase().includes(k));
 
-function render(data){
+  let counts={ml:0,pubg:0,roblox:0,valorant:0,all:0};
+  allData.forEach(o=>{if(o.status==='berjalan'){counts.all++; let ng=normGame(o.game); if(counts[ng]!==undefined) counts[ng]++;}});
+  ['all','ml','pubg','roblox','valorant'].forEach(key=>{
+    let el=document.getElementById('dot-'+key);
+    el.innerHTML = counts[key]>0?`<span class="dot">${counts[key]}</span>`:'';
+  });
+
   let jalan='',selesai='';let cJ=0,cS=0;
-  data.forEach(o=>{
+  // count for current filter
+  let curJ=0,curS=0;
+  filtered.forEach(o=>{if(o.status==='berjalan')curJ++;else curS++;});
+
+  filtered.forEach(o=>{
     let t=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID'):'-';
-    let card=`<div class="card">
-    <b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br>
-    <small style="color:#888">${t} | ${o.username||'guest'} | ${o.email||''}</small><br><br>
-    ID: <b>${o.id1||'-'}</b> ${o.id2||''}<br>
-    ${o.id3?`Backup: <b style="color:#ff8fab">${o.id3.substring(0,40)}...</b><br>`:''}
-    Harga: <b>Rp ${o.price}</b><br>
-    Device: <small>${o.deviceId||'-'}</small><br><br>
-    ${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}
-    <button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button>
-    </div>`;
+    let card=`<div class="card"><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small style="color:#888">${t} | ${o.username||'guest'}</small><br><br>ID: <b>${o.id1||'-'}</b> ${o.id2||''}<br>Harga: <b>Rp ${o.price}</b><br><br>${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}<button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button></div>`;
     if(o.status==='berjalan'){jalan+=card;cJ++;}else{selesai+=card;cS++;}
   });
+  document.getElementById('titleJalan').innerText=`🔥 Berjalan - ${curGame.toUpperCase()} (${curJ})`;
+  document.getElementById('titleSelesai').innerText=`✅ Selesai - ${curGame.toUpperCase()} (${curS})`;
   document.getElementById('listJalan').innerHTML=jalan||'<div class=card>Kosong</div>';
   document.getElementById('listSelesai').innerHTML=selesai||'<div class=card>Kosong</div>';
-  document.getElementById('totalOrder').innerText=data.length;
-  document.getElementById('totalJalan').innerText=cJ;
-  document.getElementById('totalSelesai').innerText=cS;
+  document.getElementById('totalOrder').innerText=allData.length;
+  document.getElementById('totalJalan').innerText=counts.all;
+  document.getElementById('totalSelesai').innerText=allData.length-counts.all;
 }
-
+function filter(){render();}
 async function updateHarga(){
   let g=document.getElementById('p_game').value.toLowerCase().trim();
   let i=document.getElementById('p_item').value.toLowerCase().trim();
@@ -159,51 +176,17 @@ async function updateHarga(){
   let m=Number(document.getElementById('p_modal').value)||0;
   if(!g||!i||!h) return alert('Isi Game, Item, Harga!');
   let id=g+'_'+i.replace(/ /g,'_');
-  try{
-    await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});
-    alert('Berhasil update '+i+' jadi Rp '+h);
-  }catch(e){alert('Gagal: '+e.message)}
+  try{await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,updated:Date.now()});alert('Berhasil update '+i);}catch(e){alert('Gagal: '+e.message)}
 }
-
 function loadHarga(){
   window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
-    let html='';
-    s.forEach(d=>{
-      let p=d.data();
-      let untung = p.modal?` (Untung Rp ${p.price-p.modal})`:'';
-      html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} ${untung}</small></span><button onclick="editHarga('${d.id}','${p.game}','${p.item}',${p.price})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
-    });
+    let html='';s.forEach(d=>{let p=d.data();let untung=p.modal?` (Untung Rp ${p.price-p.modal})`:'';html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} ${untung}</small></span><button onclick="editHarga('${d.id}','${p.game}','${p.item}',${p.price})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;});
     document.getElementById('listHarga').innerHTML=html||'Belum ada harga custom';
   });
 }
-
-function editHarga(id,g,i,p){
-  document.getElementById('p_game').value=g;
-  document.getElementById('p_item').value=i;
-  document.getElementById('p_harga').value=p;
-  window.scrollTo(0,0);
-}
-
-function filter(){
-  let k=document.getElementById('search').value.toLowerCase();
-  let f=allData.filter(o=> JSON.stringify(o).toLowerCase().includes(k));
-  render(f);
-}
-async function selesai(id){
-  if(!confirm('Selesaikan pesanan ini?')) return;
-  try{
-    await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai', finishedAt: Date.now(), finishedBy: currentAdmin?currentAdmin.email:'admin'});
-    alert('✅ Berhasil diselesaikan!');
-  }catch(e){
-    alert('❌ Gagal: '+e.message);
-  }
-}
-async function hapus(id){
-  if(!confirm('Hapus permanen?')) return;
-  try{
-    await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));
-  }catch(e){ alert('Gagal hapus: '+e.message) }
-}
+function editHarga(id,g,i,p){document.getElementById('p_game').value=g;document.getElementById('p_item').value=i;document.getElementById('p_harga').value=p;window.scrollTo(0,0);}
+async function selesai(id){if(!confirm('Selesaikan?'))return;try{await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai', finishedAt:Date.now()});}catch(e){alert('Gagal: '+e.message);}}
+async function hapus(id){if(!confirm('Hapus?'))return;try{await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}catch(e){alert(e.message);}}
 </script>
 </body>
 </html>
