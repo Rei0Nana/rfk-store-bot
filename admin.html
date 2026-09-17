@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFK STORE - ADMIN V11 FIX</title>
+<title>RFK STORE - ADMIN V10 ITEM PILIH</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,sans-serif;background:#141018;color:#ffc2d9;padding:12px;padding-bottom:80px}
@@ -43,8 +43,7 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </script>
 </head>
 <body>
-<div id="loading" style="text-align:center;padding:40px;color:#888">Loading admin...</div>
-<div id="login" class="hidden">
+<div id="login">
 <h2>🔐 LOGIN ADMIN</h2>
 <div class="card">
 <input id="email" type="email" placeholder="Email Admin">
@@ -54,16 +53,19 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div id="loginMsg" style="color:#ff8fab;margin-top:8px;font-size:12px"></div>
 </div>
 </div>
+
 <div id="dash" class="hidden">
 <div class="header">
 <h2 style="margin:0;font-size:16px">📊 RFK STORE<br><small id="adminEmail" style="font-size:10px;color:#888"></small></h2>
 <button onclick="logout()" style="background:#ff3b3b;color:white;border:none;padding:8px 16px;border-radius:20px;font-weight:800;font-size:12px;cursor:pointer">Logout</button>
 </div>
+
 <div class="grid">
 <div class="stat"><b id="totalOrder">0</b><small>Total</small></div>
 <div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
 <div class="stat"><b id="totalSelesai">0</b><small>Selesai</small></div>
 </div>
+
 <div class="card">
 <h3>💰 BOT HARGA AUTO % - <span id="hargaTitle">ALL</span></h3>
 <select id="p_game" onchange="onGameChange()"></select>
@@ -79,13 +81,14 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 </div>
 <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
 <input type="checkbox" id="cbBulat" checked style="width:auto" onchange="hitung()">
-<label for="cbBulat" style="font-size:13px">✨ Bulat 500/1000</label>
+<label for="cbBulat" style="font-size:13px">✨ Bulat 500/1000 (83200→83500, 83767→84000)</label>
 </div>
 <div class="preview" id="preview">Pilih Game & Item dulu...</div>
 <input id="p_harga" type="number" placeholder="Harga Jual Otomatis">
 <button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
 <div id="listHarga" style="margin-top:12px"></div>
 </div>
+
 <div class="tabs">
 <div class="tab active" data-game="all" onclick="setGame('all')">ALL <span id="dot-all"></span></div>
 <div class="tab" data-game="ml" onclick="setGame('ml')">ML <span id="dot-ml"></span></div>
@@ -93,10 +96,12 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div class="tab" data-game="roblox" onclick="setGame('roblox')">ROBLOX <span id="dot-roblox"></span></div>
 <div class="tab" data-game="valorant" onclick="setGame('valorant')">VALO <span id="dot-valorant"></span></div>
 </div>
+
 <div class="card"><input id="search" placeholder="🔍 Cari ID / Game..." oninput="filter()"></div>
 <h3 id="titleJalan">🔥 Berjalan - ALL</h3><div id="listJalan"></div>
 <h3 id="titleSelesai">✅ Selesai - ALL</h3><div id="listSelesai"></div>
 </div>
+
 <script>
 let allData=[];let curGame='all';let allPrices=[];let curPersen=15;
 const ITEMS={
@@ -106,45 +111,115 @@ const ITEMS={
   valorant:["125 VP","420 VP","700 VP","1375 VP","2400 VP","4000 VP","7000 VP"]
 };
 function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
-function bulatCantik(n){if(n<=0) return n;let base=Math.floor(n/1000)*1000;let sisa=n%1000;if(sisa===0) return n;if(sisa<=500) return base+500;return base+1000;}
-function initSelects(){let gameSel=document.getElementById('p_game');gameSel.innerHTML='<option value="">-- Pilih Game --</option><option value="ml">Mobile Legend</option><option value="pubg">PUBG Mobile</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';onGameChange();}
-function onGameChange(){let g=document.getElementById('p_game').value;let itemSel=document.getElementById('p_item');if(!g){itemSel.innerHTML='<option value="">-- Pilih Game Dulu --</option>';return;}let list=ITEMS[g]||[];let custom=allPrices.filter(p=>normGame(p.game)===g).map(p=>p.item);let merged=[...new Set([...list,...custom])];itemSel.innerHTML='<option value="">-- Pilih Item --</option>'+merged.map(it=>`<option value="${it}">${it}</option>`).join('')+'<option value="__custom">+ Item Baru (ketik manual)</option>';hitung();}
-function setPersen(p){curPersen=p;document.getElementById('p_persen').value=p;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');hitung();}
+function bulatCantik(n){
+  if(n<=0) return n;
+  let base=Math.floor(n/1000)*1000;
+  let sisa=n%1000;
+  if(sisa===0) return n;
+  if(sisa<=500) return base+500;
+  return base+1000;
+}
+function initSelects(){
+  let gameSel=document.getElementById('p_game');
+  gameSel.innerHTML='<option value="">-- Pilih Game --</option><option value="ml">Mobile Legend</option><option value="pubg">PUBG Mobile</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';
+  onGameChange();
+}
+function onGameChange(){
+  let g=document.getElementById('p_game').value;
+  let itemSel=document.getElementById('p_item');
+  if(!g){itemSel.innerHTML='<option value="">-- Pilih Game Dulu --</option>';return;}
+  let list=ITEMS[g]||[];
+  let custom=allPrices.filter(p=>normGame(p.game)===g).map(p=>p.item);
+  let merged=[...new Set([...list,...custom])];
+  itemSel.innerHTML='<option value="">-- Pilih Item --</option>'+merged.map(it=>`<option value="${it}">${it}</option>`).join('')+'<option value="__custom">+ Item Baru (ketik manual)</option>';
+  hitung();
+}
+function setPersen(p){
+  curPersen=p;
+  document.getElementById('p_persen').value=p;
+  document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  hitung();
+}
 function hitungCustom(){curPersen=Number(document.getElementById('p_persen').value)||0;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));hitung();}
-function hitung(){let itemEl=document.getElementById('p_item');if(itemEl.value==='__custom'){let custom=prompt('Nama Item Baru:');if(custom){let opt=document.createElement('option');opt.value=custom;opt.text=custom;itemEl.add(opt, itemEl.options[itemEl.options.length-1]);itemEl.value=custom;}}let modal=Number(document.getElementById('p_modal').value)||0;let persen=Number(document.getElementById('p_persen').value)||curPersen;let isBulat=document.getElementById('cbBulat').checked;if(!modal){document.getElementById('preview').innerHTML='Masukkan modal dulu...';return;}let jualRaw=modal + Math.round(modal*persen/100);let jual=isBulat?bulatCantik(jualRaw):jualRaw;document.getElementById('p_harga').value=jual;document.getElementById('preview').innerHTML=`Modal ${modal.toLocaleString('id-ID')} + ${persen}% = ${jualRaw.toLocaleString('id-ID')}<br>`+(isBulat?`<b style="color:#ff8fab;font-size:18px">✨ Jadi: Rp ${jual.toLocaleString('id-ID')}</b><br>`:`<b style="color:#ff8fab">Rp ${jual.toLocaleString('id-ID')}</b><br>`)+`<small style="color:#00c853">Untung Rp ${(jual-modal).toLocaleString('id-ID')}</small>`;}
-async function login(){let email=document.getElementById('email').value.trim();let pw=document.getElementById('pw').value;let pin=document.getElementById('pin').value;let msg=document.getElementById('loginMsg');if(!email||!pw||!pin) return msg.innerText='Isi semua!';if(pin!=='042326') return msg.innerText='PIN salah!';try{msg.innerText='Login...';let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);localStorage.setItem('rfk-admin','true');localStorage.setItem('rfk-admin-email',email);}catch(e){msg.innerText='Gagal: '+e.message;}}
+function hitung(){
+  let itemEl=document.getElementById('p_item');
+  if(itemEl.value==='__custom'){
+    let custom=prompt('Nama Item Baru: (contoh: 1000 Diamonds)');
+    if(custom){let opt=document.createElement('option');opt.value=custom;opt.text=custom;itemEl.add(opt, itemEl.options[itemEl.options.length-1]);itemEl.value=custom;}
+  }
+  let modal=Number(document.getElementById('p_modal').value)||0;
+  let persen=Number(document.getElementById('p_persen').value)||curPersen;
+  let isBulat=document.getElementById('cbBulat').checked;
+  if(!modal){document.getElementById('preview').innerHTML='Masukkan modal dulu...';return;}
+  let jualRaw=modal + Math.round(modal*persen/100);
+  let jual=isBulat?bulatCantik(jualRaw):jualRaw;
+  document.getElementById('p_harga').value=jual;
+  document.getElementById('preview').innerHTML=
+    `Modal ${modal.toLocaleString('id-ID')} + ${persen}% = ${jualRaw.toLocaleString('id-ID')}<br>`+
+    (isBulat?`<b style="color:#ff8fab;font-size:18px">✨ Jadi: Rp ${jual.toLocaleString('id-ID')}</b><br><small style="color:#888">${jualRaw} → ${jual}</small><br>`:`<b style="color:#ff8fab">Rp ${jual.toLocaleString('id-ID')}</b><br>`)+
+    `<small style="color:#00c853">Untung Rp ${(jual-modal).toLocaleString('id-ID')}</small>`;
+}
+async function login(){
+  let email=document.getElementById('email').value.trim();
+  let pw=document.getElementById('pw').value;
+  let pin=document.getElementById('pin').value;
+  let msg=document.getElementById('loginMsg');
+  if(!email||!pw||!pin) return msg.innerText='Isi semua!';
+  if(pin!=='042326') return msg.innerText='PIN salah!';
+  try{
+    msg.innerText='Login...';
+    let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
+    localStorage.setItem('rfk-admin','true');
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('adminEmail').innerText='👤 '+cred.user.email;
+    load();
+  }catch(e){msg.innerText='Gagal: '+e.message;}
+}
 window.fs.onAuthStateChanged(window.auth,(user)=>{
-  document.getElementById('loading').classList.add('hidden');
   if(user && localStorage.getItem('rfk-admin')==='true'){
     document.getElementById('login').classList.add('hidden');
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('adminEmail').innerText='👤 '+user.email;
     load();
-  }else{
-    if(localStorage.getItem('rfk-admin')==='true' &&!user){
-      // masih nunggu firebase restore, jangan langsung ke login
-      document.getElementById('loading').innerText='Memulihkan sesi admin...';
-      document.getElementById('loading').classList.remove('hidden');
-      setTimeout(()=>{
-        if(!window.auth.currentUser){
-          document.getElementById('loading').classList.add('hidden');
-          document.getElementById('login').classList.remove('hidden');
-          document.getElementById('dash').classList.add('hidden');
-        }
-      },1500);
-    }else{
-      document.getElementById('login').classList.remove('hidden');
-      document.getElementById('dash').classList.add('hidden');
-    }
+  } else if(!user){
+    document.getElementById('login').classList.remove('hidden');
+    document.getElementById('dash').classList.add('hidden');
   }
 });
-function logout(){if(!confirm('Logout admin?')) return;window.fs.signOut(window.auth);localStorage.removeItem('rfk-admin');localStorage.removeItem('rfk-admin-email');location.reload();}
-function load(){const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});loadHarga();initSelects();}
-function setGame(g){curGame=g;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelector(`.tab[data-game="${g}"]`).classList.add('active');let gameSel=document.getElementById('p_game');if(g!=='all') gameSel.value=g;onGameChange();render();renderHarga();}
-function render(){let filtered=curGame==='all'?allData:allData.filter(o=>normGame(o.game)===curGame);let k=document.getElementById('search').value.toLowerCase();if(k)filtered=filtered.filter(o=>JSON.stringify(o).toLowerCase().includes(k));let counts={ml:0,pubg:0,roblox:0,valorant:0,all:0};allData.forEach(o=>{if(o.status==='berjalan'){counts.all++;let ng=normGame(o.game);if(counts[ng]!==undefined)counts[ng]++;}});['all','ml','pubg','roblox','valorant'].forEach(key=>{let el=document.getElementById('dot-'+key);el.innerHTML=counts[key]>0?`<span class="dot">${counts[key]}</span>`:'';
+function logout(){window.fs.signOut(window.auth);localStorage.removeItem('rfk-admin');location.reload();}
+function load(){
+  const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
+  window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});
+  loadHarga();initSelects();
+}
+function setGame(g){
+  curGame=g;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[data-game="${g}"]`).classList.add('active');
+  let gameSel=document.getElementById('p_game');
+  if(g!=='all') gameSel.value=g;
+  onGameChange();
+  render(); renderHarga();
+}
+function render(){
+  let filtered=curGame==='all'?allData:allData.filter(o=>normGame(o.game)===curGame);
+  let k=document.getElementById('search').value.toLowerCase();
+  if(k)filtered=filtered.filter(o=>JSON.stringify(o).toLowerCase().includes(k));
+  let counts={ml:0,pubg:0,roblox:0,valorant:0,all:0};
+  allData.forEach(o=>{if(o.status==='berjalan'){counts.all++;let ng=normGame(o.game);if(counts[ng]!==undefined)counts[ng]++;}});
+  ['all','ml','pubg','roblox','valorant'].forEach(key=>{
+    let el=document.getElementById('dot-'+key);
+    el.innerHTML=counts[key]>0?`<span class="dot">${counts[key]}</span>`:'';
   });
-  let jalan='',selesai='',curJ=0,curS=0;filtered.forEach(o=>{if(o.status==='berjalan')curJ++;else curS++;});
-  filtered.forEach(o=>{let t=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID'):'-';let card=`<div class="card"><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>${t} | ${o.username||'guest'}</small><br><br>ID: <b>${o.id1||'-'}</b><br>Harga: Rp ${o.price}<br><br>${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}<button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button></div>`;if(o.status==='berjalan')jalan+=card;else selesai+=card;});
+  let jalan='',selesai='',curJ=0,curS=0;
+  filtered.forEach(o=>{if(o.status==='berjalan')curJ++;else curS++;});
+  filtered.forEach(o=>{
+    let t=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID'):'-';
+    let card=`<div class="card"><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>${t} | ${o.username||'guest'}</small><br><br>ID: <b>${o.id1||'-'}</b><br>Harga: Rp ${o.price}<br><br>${o.status==='berjalan'?`<button class="btn btn-green" onclick="selesai('${o.id}')">✅ Selesaikan</button>`:''}<button class="btn btn-red" onclick="hapus('${o.id}')">🗑️ Hapus</button></div>`;
+    if(o.status==='berjalan')jalan+=card;else selesai+=card;
+  });
   document.getElementById('titleJalan').innerText=`🔥 Berjalan - ${curGame.toUpperCase()} (${curJ})`;
   document.getElementById('titleSelesai').innerText=`✅ Selesai - ${curGame.toUpperCase()} (${curS})`;
   document.getElementById('listJalan').innerHTML=jalan||'<div class=card>Kosong</div>';
@@ -154,10 +229,44 @@ function render(){let filtered=curGame==='all'?allData:allData.filter(o=>normGam
   document.getElementById('totalSelesai').innerText=allData.length-counts.all;
 }
 function filter(){render();}
-async function updateHarga(){let g=document.getElementById('p_game').value.toLowerCase().trim();let i=document.getElementById('p_item').value.toLowerCase().trim();let h=Number(document.getElementById('p_harga').value);let m=Number(document.getElementById('p_modal').value)||0;let persen=Number(document.getElementById('p_persen').value)||curPersen;if(!g||!i||!h||i==='__custom') return alert('Pilih Game, Item, dan isi Modal!');let id=g+'_'+i.replace(/ /g,'_');try{await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,persen:persen,updated:Date.now()});alert(`Berhasil! ${m} + ${persen}% = Rp ${h}`);document.getElementById('p_modal').value='';document.getElementById('p_harga').value='';document.getElementById('preview').innerHTML='Pilih Game & Item dulu...';}catch(e){alert(e.message)}}
-function loadHarga(){window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{allPrices=[];s.forEach(d=>{allPrices.push({id:d.id,...d.data()})});renderHarga();onGameChange();});}
-function renderHarga(){document.getElementById('hargaTitle').innerText=curGame.toUpperCase();let filtered = curGame==='all'? allPrices : allPrices.filter(p=>normGame(p.game)===curGame);let html='';filtered.forEach(p=>{html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} (modal ${p.modal||'-'})</small></span><button onclick="editHarga('${p.game}','${p.item}',${p.price},${p.modal||0},${p.persen||15})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;});document.getElementById('listHarga').innerHTML=html||'Belum ada harga untuk '+curGame.toUpperCase();}
-function editHarga(g,i,p,m,per){document.getElementById('p_game').value=g;onGameChange();setTimeout(()=>{document.getElementById('p_item').value=i;document.getElementById('p_modal').value=m;document.getElementById('p_persen').value=per;curPersen=per;hitung();window.scrollTo(0,0);},100);}
+async function updateHarga(){
+  let g=document.getElementById('p_game').value.toLowerCase().trim();
+  let i=document.getElementById('p_item').value.toLowerCase().trim();
+  let h=Number(document.getElementById('p_harga').value);
+  let m=Number(document.getElementById('p_modal').value)||0;
+  let persen=Number(document.getElementById('p_persen').value)||curPersen;
+  if(!g||!i||!h||i==='__custom') return alert('Pilih Game, Item, dan isi Modal!');
+  let id=g+'_'+i.replace(/ /g,'_');
+  try{
+    await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,modal:m,persen:persen,updated:Date.now()});
+    alert(`Berhasil! ${m} + ${persen}% = Rp ${h}`);
+    document.getElementById('p_modal').value='';document.getElementById('p_harga').value='';document.getElementById('preview').innerHTML='Pilih Game & Item dulu...';
+  }catch(e){alert(e.message)}
+}
+function loadHarga(){
+  window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{
+    allPrices=[];s.forEach(d=>{allPrices.push({id:d.id,...d.data()})});
+    renderHarga();onGameChange();
+  });
+}
+function renderHarga(){
+  document.getElementById('hargaTitle').innerText=curGame.toUpperCase();
+  let filtered = curGame==='all'? allPrices : allPrices.filter(p=>normGame(p.game)===curGame);
+  let html='';
+  filtered.forEach(p=>{
+    html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small style=color:#888>Rp ${p.price} (modal ${p.modal||'-'})</small></span><button onclick="editHarga('${p.game}','${p.item}',${p.price},${p.modal||0},${p.persen||15})" style="background:#3a2d3f;color:white;border:none;padding:6px 12px;border-radius:8px">Edit</button></div>`;
+  });
+  document.getElementById('listHarga').innerHTML=html||'Belum ada harga untuk '+curGame.toUpperCase();
+}
+function editHarga(g,i,p,m,per){
+  document.getElementById('p_game').value=g;onGameChange();
+  setTimeout(()=>{
+    document.getElementById('p_item').value=i;
+    document.getElementById('p_modal').value=m;
+    document.getElementById('p_persen').value=per;curPersen=per;
+    hitung();window.scrollTo(0,0);
+  },100);
+}
 async function selesai(id){if(!confirm('Selesaikan?'))return;try{await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}catch(e){alert(e.message);}}
 async function hapus(id){if(!confirm('Hapus?'))return;try{await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}catch(e){alert(e.message);}}
 document.getElementById('p_persen').value=15;
