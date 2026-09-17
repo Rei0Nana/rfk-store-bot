@@ -32,12 +32,11 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #3a2d3f
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 const firebaseConfig = { apiKey: "AIzaSyBIcy7GyQCIffmDwzdha5R2omg26yzOKLo", authDomain: "rfk-store.firebaseapp.com", projectId: "rfk-store", storageBucket: "rfk-store.firebasestorage.app", messagingSenderId: "104621070837", appId: "1:104621070837:web:65dd7268d037a0a9b728bc" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-setPersistence(auth, browserSessionPersistence);
 window.db=db; window.auth=auth;
 window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, orderBy, signInWithEmailAndPassword, onAuthStateChanged, signOut};
 </script>
@@ -53,19 +52,16 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div id="loginMsg" style="color:#ff8fab;margin-top:8px;font-size:12px"></div>
 </div>
 </div>
-
 <div id="dash" class="hidden">
 <div class="header">
 <h2 style="margin:0;font-size:16px">📊 RFK STORE<br><small id="adminEmail" style="font-size:10px;color:#888"></small></h2>
 <button onclick="logout()" style="background:#ff3b3b;color:white;border:none;padding:8px 16px;border-radius:20px;font-weight:800;font-size:12px;cursor:pointer">Logout</button>
 </div>
-
 <div class="grid">
 <div class="stat"><b id="totalOrder">0</b><small>Total</small></div>
 <div class="stat"><b id="totalJalan">0</b><small>Berjalan</small></div>
 <div class="stat"><b id="totalSelesai">0</b><small>Selesai</small></div>
 </div>
-
 <div class="card">
 <h3>💰 BOT HARGA AUTO % - <span id="hargaTitle">ALL</span></h3>
 <select id="p_game" onchange="onGameChange()"></select>
@@ -88,7 +84,6 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <button class="btn btn-pink" onclick="updateHarga()">🚀 Update Realtime</button>
 <div id="listHarga" style="margin-top:12px"></div>
 </div>
-
 <div class="tabs">
 <div class="tab active" data-game="all" onclick="setGame('all')">ALL <span id="dot-all"></span></div>
 <div class="tab" data-game="ml" onclick="setGame('ml')">ML <span id="dot-ml"></span></div>
@@ -96,12 +91,10 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div class="tab" data-game="roblox" onclick="setGame('roblox')">ROBLOX <span id="dot-roblox"></span></div>
 <div class="tab" data-game="valorant" onclick="setGame('valorant')">VALO <span id="dot-valorant"></span></div>
 </div>
-
 <div class="card"><input id="search" placeholder="🔍 Cari ID / Game..." oninput="filter()"></div>
 <h3 id="titleJalan">🔥 Berjalan - ALL</h3><div id="listJalan"></div>
 <h3 id="titleSelesai">✅ Selesai - ALL</h3><div id="listSelesai"></div>
 </div>
-
 <script>
 let allData=[];let curGame='all';let allPrices=[];let curPersen=15;
 const ITEMS={
@@ -126,9 +119,12 @@ async function login(){
   if(pin!=='042326') return msg.innerText='PIN salah!';
   try{
     msg.innerText='Login...';
-    await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
+    let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
     sessionStorage.setItem('rfk-admin','true');
-    msg.innerText='Berhasil!';
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('adminEmail').innerText='👤 '+cred.user.email;
+    load();
   }catch(e){msg.innerText='Gagal: '+e.message;}
 }
 window.fs.onAuthStateChanged(window.auth,(user)=>{
@@ -137,7 +133,7 @@ window.fs.onAuthStateChanged(window.auth,(user)=>{
     document.getElementById('dash').classList.remove('hidden');
     document.getElementById('adminEmail').innerText='👤 '+user.email;
     load();
-  } else {
+  } else if(!user){
     document.getElementById('login').classList.remove('hidden');
     document.getElementById('dash').classList.add('hidden');
   }
