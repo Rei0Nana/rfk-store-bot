@@ -221,6 +221,47 @@ const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.order
 window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;let isMine=o.deviceId===deviceId||isAdmin;if(!isMine)return;let tgl=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>📅 ${tgl} | 👤 ${o.username||'guest'} | 🆔 ${o.id1||''}</small><br><b>Rp ${o.price}</b><br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
 const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
 window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
+
+// ===== FITUR BARU: SYNC HARGA DARI ADMIN - GAK UBAH YANG LAIN =====
+const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
+window.fs.onSnapshot(qHarga, snap=>{
+  const map={};
+  snap.forEach(d=>{
+    let p=d.data();
+    // key normal: game + item lower
+    let k1 = (p.game+'_'+p.item).toLowerCase().replace(/\s+/g,'_');
+    let k2 = p.item.toLowerCase().trim();
+    map[k1]=p.price;
+    map[k2]=p.price;
+  });
+  document.querySelectorAll('.price').forEach(el=>{
+    let oc = el.getAttribute('onclick')||'';
+    // ambil item dari onclick: 'ML','Weekly Diamond Pass (Event Topup +100)','33657'
+    let m = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'/);
+    if(!m){
+      // untuk roblox: '500 Robux','82500'
+      m = oc.match(/'([^']+)'\s*,\s*'([^']+)'/);
+      if(m){
+        let item = m[1].toLowerCase().trim();
+        let key = Object.keys(map).find(k=>k===item || item.includes(k) || k.includes(item));
+        if(key && map[key]){
+          let np = map[key];
+          let b = el.querySelector('b'); if(b) b.innerText='Rp '+Number(np).toLocaleString('id-ID');
+          el.setAttribute('onclick', oc.replace(/'[^']+'\)$/, `'${np}')`));
+        }
+      }
+      return;
+    }
+    let item = m[2].toLowerCase().trim();
+    let full = (m[1]+'_'+m[2]).toLowerCase().replace(/\s+/g,'_');
+    let priceBaru = map[full] || map[item] || Object.keys(map).find(k=>item.includes(k) || k.includes(item)) ? map[Object.keys(map).find(k=>item.includes(k) || k.includes(item))] : null;
+    if(priceBaru){
+      let b = el.querySelector('b'); if(b) b.innerText='Rp '+Number(priceBaru).toLocaleString('id-ID');
+      el.setAttribute('onclick', oc.replace(/,'[^']+'\)$/, `,'${priceBaru}')`));
+    }
+  });
+});
+
 }catch(e){console.log(e)}},800);
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
