@@ -48,11 +48,11 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(-
 .wa-btn{background:#25D366;color:white}.discord-btn{background:#5865F2;color:white}
 .star{font-size:26px;cursor:pointer;color:#ddd}.star.active{color:#ffc107}
 .review-card{border-bottom:1px solid var(--border);padding:10px 0}
-.daftar-title{font-size:28px;font-weight:900;margin:0 0 4px;color:#fff}
-.daftar-sub{color:#aaa;font-size:14px;margin-bottom:18px}
+.daftar-title{font-size:28px;font-weight:900;margin:0 0 4px;color:var(--text)}
+.daftar-sub{color:var(--text);font-size:14px;margin-bottom:18px;opacity:0.7}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-label{font-size:13px;font-weight:700;margin:12px 0 4px;display:block;color:#bbb}
-.dark-input{background:#2a2a2e!important;border-color:#3a3a3e!important;color:#fff!important}
+.form-label{font-size:13px;font-weight:700;margin:12px 0 4px;display:block;color:var(--text)}
+.dark-input{background:var(--bg)!important;border-color:var(--border)!important;color:var(--text)!important}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -87,7 +87,7 @@ window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, 
 <div class="pcard" style="text-align:center">Via QRIS atau BCA</div>
 </div>
 <div id="auth" class="hidden content-pad">
-<div class="pcard" style="max-width:520px;margin:10px auto;background:#18181b;border:none;color:#fff">
+<div class="pcard" style="max-width:520px;margin:10px auto;background:var(--card);border:1px solid var(--border);color:var(--text)">
 <div id="auth-login-view">
 <div class="daftar-title">Masuk</div><div class="daftar-sub">Masukkan username dan kata sandi kamu.</div>
 <label class="form-label">Username</label><input id="loginUsername" placeholder="Username" class="dark-input">
@@ -109,7 +109,7 @@ window.db=db; window.auth=auth; window.fs={collection, addDoc, onSnapshot, doc, 
 <button class="btn2" style="background:#ff8fab;color:white;margin-top:18px" onclick="daftarUsername()">Daftar</button>
 <div style="text-align:center;margin-top:12px;font-size:13px;color:#888">Sudah punya akun? <span style="color:#ff8fab;font-weight:700;cursor:pointer" onclick="switchAuth('login')">Masuk</span></div>
 </div>
-<button class="btn-batal hidden" id="logoutBtn" onclick="logout()" style="color:#fff;border-color:#3a3a3e;margin-top:12px">Logout</button>
+<button class="btn-batal hidden" id="logoutBtn" onclick="logout()" style="color:var(--text);border-color:var(--border);margin-top:12px">Logout</button>
 <div id="authMsg" style="margin-top:10px;font-size:12px;text-align:center;color:#ff8fab"></div>
 </div>
 </div>
