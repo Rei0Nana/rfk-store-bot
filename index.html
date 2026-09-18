@@ -51,11 +51,6 @@ input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(-
 .wa-btn{background:#25D366;color:white}.discord-btn{background:#5865F2;color:white}
 .star{font-size:26px;cursor:pointer;color:#ddd}.star.active{color:#ffc107}
 .review-card{border-bottom:1px solid var(--border);padding:10px 0}
-.daftar-title{font-size:28px;font-weight:900;margin:0 0 4px;color:var(--text)}
-.daftar-sub{color:var(--text);font-size:14px;margin-bottom:18px;opacity:0.7}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-label{font-size:13px;font-weight:700;margin:12px 0 4px;display:block;color:var(--text)}
-.dark-input{background:var(--bg)!important;border-color:var(--border)!important;color:var(--text)!important}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -217,21 +212,18 @@ try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(
 function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUser ID: ${tmp.id1}\nServer: ${tmp.id2}`;if(tmp.type==='pubg') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nPUBG ID: ${tmp.id1}`;if(tmp.type==='valo') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nValorant ID: ${tmp.id1}`;if(tmp.type==='roblox') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUsername: ${tmp.id1}\nPassword: ${tmp.id2}\nKode Backup (${tmp.codeCount||2} kode): ${tmp.id3}`;return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nID: ${tmp.id1} ${tmp.id2||''} ${tmp.id3||''}`;}
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
-let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput .star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}setStar(5);
+let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput.star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}setStar(5);
 async function kirimUlasan(){let nama=document.getElementById('namaUlasan').value||'Anonim';let komen=document.getElementById('komentarUlasan').value;if(!komen) return alert('Tulis komentar dulu!');await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya! ⭐');}
-setTimeout(()=>{try{
-const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
-window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;let isMine=o.deviceId===deviceId||isAdmin;if(!isMine)return;let tgl=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>📅 ${tgl} | 👤 ${o.username||'guest'} | 🆔 ${o.id1||''}</small><br><b>Rp ${o.price}</b><br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
-const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
-window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
 
-// ===== FIX SYNC HARGA - ANTI CACHE & ANTI BUG - 100% BARU =====
+// ====== SYNC HARGA LANGSUNG - GAK PAKAI DELAY 800ms - FIX REFRESH ======
 const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+try{
 const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
 window.fs.onSnapshot(qHarga, snap=>{
   const map={};
   snap.forEach(d=>{
     let p=d.data();
+    if(!p.item ||!p.price) return;
     map[norm(p.item)] = p.price;
     map[norm(p.game+' '+p.item)] = p.price;
   });
@@ -248,7 +240,7 @@ window.fs.onSnapshot(qHarga, snap=>{
     let key = norm(itemRaw);
     let hargaBaru = map[key];
     if(!hargaBaru){
-      let found = Object.keys(map).find(k=> key.includes(k) || k.includes(key));
+      let found = Object.keys(map).find(k=> k.length>3 && (key.includes(k) || k.includes(key)));
       if(found) hargaBaru = map[found];
     }
     if(hargaBaru){
@@ -258,8 +250,15 @@ window.fs.onSnapshot(qHarga, snap=>{
     }
   });
 });
+}catch(e){console.log('harga err',e)}
 
+setTimeout(()=>{try{
+const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
+window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;let isMine=o.deviceId===deviceId||isAdmin;if(!isMine)return;let tgl=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>📅 ${tgl} | 👤 ${o.username||'guest'} | 🆔 ${o.id1||''}</small><br><b>Rp ${o.price}</b><br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
+const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
+window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
 }catch(e){console.log(e)}},800);
+
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
 window.addEventListener('DOMContentLoaded',()=>{let last = sessionStorage.getItem('rfk-last');if(last && document.getElementById(last)){hideAll();document.getElementById(last).classList.remove('hidden');if(last!=='home'){lastGame=last;}showTab(last);} else {showTab('home');}});
