@@ -203,7 +203,7 @@ function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).
 let selectedStar = 0;
 function setStar(n){
   selectedStar = n;
-  document.querySelectorAll('#starInput.star').forEach((s,i)=>{
+  document.querySelectorAll('#starInput .star').forEach((s,i)=>{
     s.classList.toggle('active', i < n);
   });
 }
@@ -225,7 +225,7 @@ async function kirimUlasan(){
   document.getElementById('namaUlasan').value='';
   document.getElementById('sensorNama').checked=false;
   selectedStar=0;
-  document.querySelectorAll('#starInput.star').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#starInput .star').forEach(s=>s.classList.remove('active'));
   alert('Makasih ulasannya! ⭐');
 }
 
