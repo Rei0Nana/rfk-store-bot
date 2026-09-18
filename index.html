@@ -150,7 +150,7 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div id="bayar" class="hidden content-pad"><h3>Konfirmasi Pesanan</h3><div class="pcard" id="bayarInfo"></div><div class="pcard" style="text-align:center"><b>Pembayaran: QRIS / BCA</b><br><small style="color:#888">Pilih chat via mana?</small><br><br><button class="btn2 wa-btn" onclick="konfirmWA()">💚 Chat via WhatsApp Bisnis</button><button class="btn2 discord-btn" onclick="konfirmDiscord()">🎮 Chat via Discord</button><button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button></div></div>
 <div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan</h3><div id="listPesanan"></div></div>
 <div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai</h3><div id="listRiwayat"></div></div>
-<div id="ulasan" class="hidden content-pad"><h3>⭐ Ulasan Pelanggan</h3><div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div><div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star active" onclick="setStar(1)">★</span><span class="star active" onclick="setStar(2)">★</span><span class="star active" onclick="setStar(3)">★</span><span class="star active" onclick="setStar(4)">★</span><span class="star active" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div><div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div></div>
+<div id="ulasan" class="hidden content-pad"><h3>⭐ Ulasan Pelanggan</h3><div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div><div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div><div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div></div>
 <div id="support" class="hidden content-pad"><h3>Support</h3><div class="pcard support-card"><div style="font-size:42px">💬</div><b>Butuh Bantuan?</b><br><small style="color:#888">Admin Online 08:00 - 22:00 WIB</small><br><br><a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a><a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a></div></div>
 </div>
 <div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-ulasan" onclick="showTab('ulasan')">Ulasan</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-support" onclick="showTab('support')">Support</div></div>
@@ -158,7 +158,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 let tmp={};let lastGame='home';
 let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
 const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='RFK042326'){localStorage.setItem('rfk-admin','true');alert('Mode Admin Aktif RFK042326');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
-
 function pushHistory(page){try{history.pushState({page:page},'', '#'+page);}catch(e){}sessionStorage.setItem('rfk-last',page);}
 function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');pushHistory(id);window.scrollTo(0,0);}
 function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
@@ -179,60 +178,54 @@ function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan $
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
 
-// ===== FIX 1: BINTANG ULASAN BISA DIKLIK - CUMA UBAH SELECTOR SPASI =====
-let selectedStar=5;
+// ===== FIX FINAL BINTANG - BISA PILIH, GAK PERMANEN 5 =====
+let selectedStar = 0;
 function setStar(n){
-  selectedStar=n;
+  selectedStar = n;
   document.querySelectorAll('#starInput.star').forEach((s,i)=>{
     s.classList.toggle('active', i < n);
   });
 }
-setStar(5);
 
-async function kirimUlasan(){let nama=document.getElementById('namaUlasan').value||'Anonim';let komen=document.getElementById('komentarUlasan').value;if(!komen) return alert('Tulis komentar dulu!');await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya! ⭐');}
+async function kirimUlasan(){
+  if(selectedStar===0) return alert('Pilih bintang dulu! ⭐');
+  let nama=document.getElementById('namaUlasan').value||'Anonim';
+  let komen=document.getElementById('komentarUlasan').value;
+  if(!komen) return alert('Tulis komentar dulu!');
+  await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});
+  document.getElementById('komentarUlasan').value='';
+  // reset bintang setelah kirim
+  selectedStar=0;
+  document.querySelectorAll('#starInput.star').forEach(s=>s.classList.remove('active'));
+  alert('Makasih ulasannya! ⭐');
+}
 
-// ===== FIX 2: HARGA ADMIN LANGSUNG BERUBAH DI PEMBELI - EXACT MATCH + ANTI X2 =====
+// FIX HARGA ADMIN
 const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 let savedMap = {};
 try{ savedMap = JSON.parse(localStorage.getItem('rfk-prices')||'{}'); }catch(e){}
-
 function applyPrices(map){
   if(!map || Object.keys(map).length===0) return;
   document.querySelectorAll('.price').forEach(el=>{
     let oc = el.getAttribute('onclick')||'';
     let m = oc.match(/'[^']+'\s*,\s*'([^']+)'\s*,\s*'[^']+'\s*\)/);
-    if(!m){
-      let m2 = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*\)/);
-      if(m2) m = [null, m2[1]];
-    }
+    if(!m){ let m2 = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*\)/); if(m2) m=[null,m2[1]]; }
     if(!m) return;
-    let itemRaw = m[1];
-    let key = norm(itemRaw);
-    let hargaBaru = map[key];
+    let hargaBaru = map[norm(m[1])];
     if(hargaBaru){
-      let b = el.querySelector('b');
-      if(b) b.innerText='Rp '+Number(hargaBaru).toLocaleString('id-ID');
+      let b=el.querySelector('b'); if(b) b.innerText='Rp '+Number(hargaBaru).toLocaleString('id-ID');
       el.setAttribute('onclick', oc.replace(/,'[^']+'\)\s*$/, `,'${hargaBaru}')`));
     }
   });
 }
 applyPrices(savedMap);
-
 function startSync(){
   if(!window.fs ||!window.fs.collection){ setTimeout(startSync,300); return; }
   try{
     const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
     window.fs.onSnapshot(qHarga, snap=>{
-      const map={};
-      snap.forEach(d=>{
-        let p=d.data();
-        if(!p.item ||!p.price) return;
-        map[norm(p.item)] = p.price; // EXACT MATCH NAMA ITEM DOANG
-      });
-      if(Object.keys(map).length>0){
-        localStorage.setItem('rfk-prices', JSON.stringify(map));
-        applyPrices(map);
-      }
+      const map={}; snap.forEach(d=>{let p=d.data(); if(!p.item||!p.price) return; map[norm(p.item)]=p.price;});
+      if(Object.keys(map).length>0){ localStorage.setItem('rfk-prices', JSON.stringify(map)); applyPrices(map); }
     });
   }catch(e){ setTimeout(startSync,500); }
 }
@@ -244,22 +237,9 @@ window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id
 const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
 window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
 }catch(e){console.log(e)}},800);
-
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
-window.addEventListener('DOMContentLoaded',()=>{
-  let hash=location.hash.replace('#','');
-  let last=hash||sessionStorage.getItem('rfk-last')||'home';
-  if(last&&document.getElementById(last)){
-    hideAll();document.getElementById(last).classList.remove('hidden');
-    if(last!=='home')lastGame=last;
-    showTab(last);
-    if(!hash) history.replaceState({page:last},'', '#'+last);
-  }else{
-    showTab('home');
-    history.replaceState({page:'home'},'', '#home');
-  }
-});
+window.addEventListener('DOMContentLoaded',()=>{let hash=location.hash.replace('#','');let last=hash||sessionStorage.getItem('rfk-last')||'home';if(last&&document.getElementById(last)){hideAll();document.getElementById(last).classList.remove('hidden');if(last!=='home')lastGame=last;showTab(last);if(!hash) history.replaceState({page:last},'', '#'+last);}else{showTab('home');history.replaceState({page:'home'},'', '#home');}});
 </script>
 </body>
 </html>
