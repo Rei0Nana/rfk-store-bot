@@ -215,18 +215,12 @@ function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).
 let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput.star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}setStar(5);
 async function kirimUlasan(){let nama=document.getElementById('namaUlasan').value||'Anonim';let komen=document.getElementById('komentarUlasan').value;if(!komen) return alert('Tulis komentar dulu!');await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya! ⭐');}
 
-// ====== SYNC HARGA LANGSUNG - GAK PAKAI DELAY 800ms - FIX REFRESH ======
+// ====== SYNC HARGA FINAL V3 - ANTI BALIK NORMAL ======
 const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-try{
-const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
-window.fs.onSnapshot(qHarga, snap=>{
-  const map={};
-  snap.forEach(d=>{
-    let p=d.data();
-    if(!p.item ||!p.price) return;
-    map[norm(p.item)] = p.price;
-    map[norm(p.game+' '+p.item)] = p.price;
-  });
+let savedMap = {};
+try{ savedMap = JSON.parse(localStorage.getItem('rfk-prices')||'{}'); }catch(e){}
+function applyPrices(map){
+  if(!map || Object.keys(map).length===0) return;
   document.querySelectorAll('.price').forEach(el=>{
     let oc = el.getAttribute('onclick')||'';
     let m = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'/);
@@ -240,7 +234,7 @@ window.fs.onSnapshot(qHarga, snap=>{
     let key = norm(itemRaw);
     let hargaBaru = map[key];
     if(!hargaBaru){
-      let found = Object.keys(map).find(k=> k.length>3 && (key.includes(k) || k.includes(key)));
+      let found = Object.keys(map).find(k=> k.length>4 && (key===k || key.includes(k) || k.includes(key)));
       if(found) hargaBaru = map[found];
     }
     if(hargaBaru){
@@ -249,8 +243,28 @@ window.fs.onSnapshot(qHarga, snap=>{
       el.setAttribute('onclick', oc.replace(/,'[^']+'\)\s*$/, `,'${hargaBaru}')`));
     }
   });
-});
-}catch(e){console.log('harga err',e)}
+}
+applyPrices(savedMap);
+function startSync(){
+  if(!window.fs ||!window.fs.collection){ setTimeout(startSync,300); return; }
+  try{
+    const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
+    window.fs.onSnapshot(qHarga, snap=>{
+      const map={};
+      snap.forEach(d=>{
+        let p=d.data();
+        if(!p.item ||!p.price) return;
+        map[norm(p.item)] = p.price;
+        map[norm(p.game+' '+p.item)] = p.price;
+      });
+      if(Object.keys(map).length>0){
+        localStorage.setItem('rfk-prices', JSON.stringify(map));
+        applyPrices(map);
+      }
+    });
+  }catch(e){ setTimeout(startSync,500); }
+}
+startSync();
 
 setTimeout(()=>{try{
 const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
