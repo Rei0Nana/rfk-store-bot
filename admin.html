@@ -126,7 +126,25 @@ function render(){let f=curGame==='all'?allData:allData.filter(o=>normGame(o.gam
 function filter(){render();}
 async function updateHarga(){let g=document.getElementById('p_game').value.toLowerCase().trim();let i=document.getElementById('p_item').value.toLowerCase().trim();let h=Number(document.getElementById('p_harga').value);if(!g||!i||!h)return alert('Lengkapi!');let id=g+'_'+i.replace(/ /g,'_');await window.fs.setDoc(window.fs.doc(window.db,'prices',id),{game:g,item:i,price:h,updated:Date.now()});alert('Harga update!');}
 function loadHarga(){window.fs.onSnapshot(window.fs.collection(window.db,'prices'),s=>{allPrices=[];s.forEach(d=>{allPrices.push({id:d.id,...d.data()})});renderHarga();});}
-function renderHarga(){let filtered=curGame==='all'?allPrices:allPrices.filter(p=>normGame(p.game)===curGame);let html='';filtered.forEach(p=>{html+=`<div class=price-item><span>${p.game} - ${p.item}<br><small>Rp ${p.price}</small></span><button onclick="hapusHarga('${p.id}')" style="padding:6px 10px;border-radius:8px;border:none;background:#ff3b3b;color:white;cursor:pointer">Hapus</button></div>`;});document.getElementById('listHarga').innerHTML=html||'Belum ada';}
+function renderHarga(){
+  let filtered=curGame==='all'?allPrices:allPrices.filter(p=>normGame(p.game)===curGame);
+  let html='';
+  filtered.forEach(p=>{
+    html+=`<div class="price-item"><span>${p.game} - ${p.item}<br><small>Rp ${p.price}</small></span><div style="display:flex;gap:6px"><button onclick="editHarga('${p.game}','${p.item}',${p.price})" style="padding:6px 10px;border-radius:8px;border:none;background:#3a2d3f;color:white;cursor:pointer">Edit</button><button onclick="hapusHarga('${p.id}')" style="padding:6px 10px;border-radius:8px;border:none;background:#ff3b3b;color:white;cursor:pointer">Hapus</button></div></div>`;
+  });
+  document.getElementById('listHarga').innerHTML=html||'Belum ada';
+}
+function editHarga(g,i,harga){
+  document.getElementById('p_game').value=g;
+  onGameChange();
+  setTimeout(()=>{
+    document.getElementById('p_item').innerHTML=`<option value="${i}">${i}</option>`;
+    document.getElementById('p_item').value=i;
+    document.getElementById('p_harga').value=harga;
+    document.getElementById('preview').innerHTML=`Edit: <b>${g} - ${i}</b><br>Rp ${harga}`;
+    window.scrollTo({top:0,behavior:'smooth'});
+  },100);
+}
 async function hapusHarga(id){if(!confirm('Hapus?'))return;await window.fs.deleteDoc(window.fs.doc(window.db,'prices',id));}
 async function selesai(id){await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 async function hapus(id){if(!confirm('Hapus?'))return;await window.fs.deleteDoc(window.fs.doc(window.db,'orders',id));}
