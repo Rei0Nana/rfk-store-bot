@@ -163,6 +163,10 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <span class="star" onclick="setStar(5)">★</span>
 </div>
 <input id="namaUlasan" placeholder="Nama kamu">
+<div style="display:flex;align-items:center;gap:6px;margin:6px 0">
+<input type="checkbox" id="sensorNama" style="width:auto;margin:0">
+<label for="sensorNama" style="font-size:12px;color:#888">Sensor nama saya (tampil jadi R***)</label>
+</div>
 <textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea>
 <button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button>
 </div>
@@ -195,13 +199,18 @@ function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan $
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
 
-// FIX BINTANG NYALA LANGSUNG - GAK PAKE TULISAN
+// BINTANG NYALA LANGSUNG
 let selectedStar = 0;
 function setStar(n){
   selectedStar = n;
-  document.querySelectorAll('#starInput .star').forEach((s,i)=>{
+  document.querySelectorAll('#starInput.star').forEach((s,i)=>{
     s.classList.toggle('active', i < n);
   });
+}
+
+function sensorText(nama){
+  if(!nama || nama.length <= 1) return "***";
+  return nama[0] + "***";
 }
 
 async function kirimUlasan(){
@@ -209,12 +218,22 @@ async function kirimUlasan(){
   let nama=document.getElementById('namaUlasan').value||'Anonim';
   let komen=document.getElementById('komentarUlasan').value;
   if(!komen) return alert('Tulis komentar dulu!');
-  await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});
+  let isSensor = document.getElementById('sensorNama').checked;
+
+  await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{
+    nama:nama,
+    komentar:komen,
+    bintang:selectedStar,
+    isSensor:isSensor,
+    createdAt:Date.now()
+  });
   document.getElementById('komentarUlasan').value='';
   document.getElementById('namaUlasan').value='';
+  document.getElementById('sensorNama').checked=false;
   selectedStar=0;
-  document.querySelectorAll('#starInput .star').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#starInput.star').forEach(s=>s.classList.remove('active'));
   alert('Makasih ulasannya! ⭐');
+}ulasannya! ⭐');
 }
 
 // FIX HARGA ADMIN
@@ -252,7 +271,7 @@ setTimeout(()=>{try{
 const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
 window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id=d.id;let isMine=o.deviceId===deviceId||isAdmin;if(!isMine)return;let tgl=o.createdAt?new Date(o.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';let card=`<div class=pcard><b>${o.game} - ${o.item}</b> <span class="badge ${o.status}">${o.status}</span><br><small>📅 ${tgl} | 👤 ${o.username||'guest'} | 🆔 ${o.id1||''}</small><br><b>Rp ${o.price}</b><br><button class="btn admin-only" onclick="selesaiPesanan('${id}')">Selesaikan (Admin)</button></div>`;if(o.status==='berjalan')b+=card;else seles+=card;});document.getElementById('listPesanan').innerHTML=b||'<div class=pcard>Belum ada pesanan berjalan</div>';document.getElementById('listRiwayat').innerHTML=seles||'<div class=pcard>Belum ada riwayat</div>';});
 const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
-window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
+window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';let namaTampil=r.isSensor?(r.nama[0]+'***'):r.nama;html+=`<div class=review-card><b>${namaTampil}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
 }catch(e){console.log(e)}},800);
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
