@@ -150,7 +150,25 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <div id="bayar" class="hidden content-pad"><h3>Konfirmasi Pesanan</h3><div class="pcard" id="bayarInfo"></div><div class="pcard" style="text-align:center"><b>Pembayaran: QRIS / BCA</b><br><small style="color:#888">Pilih chat via mana?</small><br><br><button class="btn2 wa-btn" onclick="konfirmWA()">💚 Chat via WhatsApp Bisnis</button><button class="btn2 discord-btn" onclick="konfirmDiscord()">🎮 Chat via Discord</button><button class="btn-batal" onclick="batalBayar()">❌ Batal - Pilih Item Lain</button></div></div>
 <div id="pesanan" class="hidden content-pad"><h3>Pesanan Berjalan</h3><div id="listPesanan"></div></div>
 <div id="riwayat" class="hidden content-pad"><h3>Riwayat Selesai</h3><div id="listRiwayat"></div></div>
-<div id="ulasan" class="hidden content-pad"><h3>⭐ Ulasan Pelanggan</h3><div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div><div class="pcard"><h4>Beri Ulasan</h4><div id="starInput" style="text-align:center;margin:10px 0"><span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span><span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span><span class="star" onclick="setStar(5)">★</span></div><input id="namaUlasan" placeholder="Nama kamu"><textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea><button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button></div><div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div></div>
+<div id="ulasan" class="hidden content-pad">
+<h3>⭐ Ulasan Pelanggan</h3>
+<div class="pcard" style="text-align:center"><b id="avgRating" style="font-size:32px;color:#e84393">5.0</b><br><span id="avgStars" style="color:#ffc107;font-size:20px">★★★★★</span><br><small id="totalUlasan" style="color:#888">0 ulasan</small></div>
+<div class="pcard">
+<h4>Beri Ulasan</h4>
+<div id="starInput" style="text-align:center;margin:10px 0">
+<span class="star" onclick="setStar(1)">★</span>
+<span class="star" onclick="setStar(2)">★</span>
+<span class="star" onclick="setStar(3)">★</span>
+<span class="star" onclick="setStar(4)">★</span>
+<span class="star" onclick="setStar(5)">★</span>
+<div id="starLabel" style="margin-top:6px;font-size:12px;color:#888">Pilih bintang dulu</div>
+</div>
+<input id="namaUlasan" placeholder="Nama kamu">
+<textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea>
+<button class="btn" onclick="kirimUlasan()">Kirim Ulasan ⭐</button>
+</div>
+<div class="pcard"><h4>Semua Ulasan</h4><div id="listUlasan">Loading...</div></div>
+</div>
 <div id="support" class="hidden content-pad"><h3>Support</h3><div class="pcard support-card"><div style="font-size:42px">💬</div><b>Butuh Bantuan?</b><br><small style="color:#888">Admin Online 08:00 - 22:00 WIB</small><br><br><a class="support-btn wa-btn" href="https://wa.me/6285333403905?text=Halo%20RFK%20STORE" target="_blank">💚 Chat WhatsApp Bisnis</a><a class="support-btn discord-btn" href="https://discordapp.com/users/1546094614908239972" target="_blank">🎮 Chat via Discord</a></div></div>
 </div>
 <div class="nav"><div id="n-home" class="active" onclick="showTab('home')">Beranda</div><div id="n-ulasan" onclick="showTab('ulasan')">Ulasan</div><div id="n-pesanan" onclick="showTab('pesanan')">Pesanan</div><div id="n-riwayat" onclick="showTab('riwayat')">Riwayat</div><div id="n-support" onclick="showTab('support')">Support</div></div>
@@ -178,13 +196,15 @@ function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan $
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
 
-// ===== FIX FINAL BINTANG - BISA PILIH, GAK PERMANEN 5 =====
+// ===== FIX FINAL BINTANG + LABEL =====
 let selectedStar = 0;
 function setStar(n){
   selectedStar = n;
   document.querySelectorAll('#starInput.star').forEach((s,i)=>{
     s.classList.toggle('active', i < n);
   });
+  let label = document.getElementById('starLabel');
+  if(label) label.innerText = n + '/5 bintang dipilih ⭐';
 }
 
 async function kirimUlasan(){
@@ -194,9 +214,10 @@ async function kirimUlasan(){
   if(!komen) return alert('Tulis komentar dulu!');
   await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});
   document.getElementById('komentarUlasan').value='';
-  // reset bintang setelah kirim
+  document.getElementById('namaUlasan').value='';
   selectedStar=0;
   document.querySelectorAll('#starInput.star').forEach(s=>s.classList.remove('active'));
+  document.getElementById('starLabel').innerText='Pilih bintang dulu';
   alert('Makasih ulasannya! ⭐');
 }
 
