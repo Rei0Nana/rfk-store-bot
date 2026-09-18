@@ -55,7 +55,11 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <select id="p_item" onchange="hitung()"></select>
 <input id="p_modal" type="number" placeholder="Modal 73000" oninput="hitung()">
 <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">
-<button class="btn-small" onclick="setPersen(5)">+5%</button><button class="btn-small" onclick="setPersen(10)">+10%</button><button class="btn-small active" onclick="setPersen(15)">+15%</button><button class="btn-small" onclick="setPersen(20)">+20%</button><button class="btn-small" onclick="setPersen(25)">+25%</button>
+<button class="btn-small" onclick="setPersen(5,this)">+5%</button>
+<button class="btn-small" onclick="setPersen(10,this)">+10%</button>
+<button class="btn-small active" onclick="setPersen(15,this)">+15%</button>
+<button class="btn-small" onclick="setPersen(20,this)">+20%</button>
+<button class="btn-small" onclick="setPersen(25,this)">+25%</button>
 <input id="p_persen" type="number" placeholder="%" style="width:80px;margin:0" oninput="hitungCustom()">
 </div>
 <div style="display:flex;gap:8px;margin:8px 0"><input type="checkbox" id="cbBulat" checked style="width:auto"><label for="cbBulat">Bulat 500/1000</label></div>
@@ -87,8 +91,18 @@ function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes
 function bulatCantik(n){if(n<=0)return n;let base=Math.floor(n/1000)*1000;let sisa=n%1000;if(sisa===0)return n;if(sisa<=500)return base+500;return base+1000;}
 function initSelects(){let g=document.getElementById('p_game');g.innerHTML='<option value="">Pilih Game</option><option value="ml">ML</option><option value="pubg">PUBG</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';onGameChange();}
 function onGameChange(){let g=document.getElementById('p_game').value;let sel=document.getElementById('p_item');if(!g){sel.innerHTML='<option>Pilih Game Dulu</option>';return;}let list=ITEMS[g]||[];sel.innerHTML='<option value="">Pilih Item</option>'+list.map(it=>`<option value="${it}">${it}</option>`).join('');hitung();}
-function setPersen(p){curPersen=p;document.getElementById('p_persen').value=p;hitung();}
-function hitungCustom(){curPersen=Number(document.getElementById('p_persen').value)||0;hitung();}
+function setPersen(p, el){
+  curPersen=p;
+  document.getElementById('p_persen').value=p;
+  document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  hitung();
+}
+function hitungCustom(){
+  curPersen=Number(document.getElementById('p_persen').value)||0;
+  document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));
+  hitung();
+}
 function hitung(){let modal=Number(document.getElementById('p_modal').value)||0;let persen=Number(document.getElementById('p_persen').value)||curPersen;let bulat=document.getElementById('cbBulat').checked;if(!modal){document.getElementById('preview').innerHTML='Masukkan modal';return;}let raw=modal+Math.round(modal*persen/100);let jual=bulat?bulatCantik(raw):raw;document.getElementById('p_harga').value=jual;document.getElementById('preview').innerHTML=`${modal} + ${persen}% = ${raw}<br><b>Rp ${jual}</b> Untung ${jual-modal}`;}
 
 async function login(){
