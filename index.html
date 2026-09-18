@@ -158,13 +158,30 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 let tmp={};let lastGame='home';
 let deviceId=localStorage.getItem('rfk-device')||('dev_'+Math.random().toString(36).slice(2,9));localStorage.setItem('rfk-device',deviceId);
 const urlParams=new URLSearchParams(location.search);if(urlParams.get('admin')==='RFK042326'){localStorage.setItem('rfk-admin','true');alert('Mode Admin Aktif RFK042326');}const isAdmin=localStorage.getItem('rfk-admin')==='true';if(isAdmin)document.body.classList.add('is-admin');
-function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);}
+
+// FIX BACK BUTTON BIAR KAYAK BARONGSAY.ID - GAK LANGSUNG KELUAR WEB
+function pushHistory(page){
+  try{ history.pushState({page:page}, '', '#'+page); }catch(e){}
+  sessionStorage.setItem('rfk-last',page);
+}
+function op(id){lastGame=id;hideAll();document.getElementById(id).classList.remove('hidden');pushHistory(id);window.scrollTo(0,0);}
 function hideAll(){['ml','pb','rb','vl','form','bayar','pesanan','riwayat','support','ulasan','home'].forEach(x=>{let e=document.getElementById(x);if(e)e.classList.add('hidden')});}
-function showTab(t){hideAll();let id=t==='home'?'home':t;if(document.getElementById(id))document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));let el=document.getElementById('n-'+t);if(el)el.classList.add('active');if(['ml','pb','rb','vl'].includes(t))lastGame=t;}
-function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');sessionStorage.setItem('rfk-last',lastGame);}
-function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');sessionStorage.setItem('rfk-last',lastGame);}}
+function showTab(t){hideAll();let id=t==='home'?'home':t;if(document.getElementById(id))document.getElementById(id).classList.remove('hidden');sessionStorage.setItem('rfk-last',id);document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));let el=document.getElementById('n-'+t);if(el)el.classList.add('active');if(['ml','pb','rb','vl'].includes(t))lastGame=t;pushHistory(id);}
+function batal(){hideAll();document.getElementById(lastGame).classList.remove('hidden');pushHistory(lastGame);}
+function batalBayar(){if(confirm('Batalin pesanan ini? Mau pilih item lain?')){hideAll();document.getElementById(lastGame).classList.remove('hidden');pushHistory(lastGame);}}
+
+window.addEventListener('popstate',(e)=>{
+  let page = e.state?.page || location.hash.replace('#','') || 'home';
+  if(!document.getElementById(page)) page='home';
+  hideAll();
+  document.getElementById(page).classList.remove('hidden');
+  document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
+  let nav=document.getElementById('n-'+page); if(nav) nav.classList.add('active');
+  if(page==='home') document.getElementById('n-home').classList.add('active');
+});
+
 function togglePass(){let inp=document.getElementById('id2');let btn=document.getElementById('eyeBtn');if(!inp)return;if(inp.type==='password'){inp.type='text';btn.innerText='🙈';}else{inp.type='password';btn.innerText='👁️';}}
-function beliML(g,i,p){tmp={game:g,item:i,price:p,type:'ml'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678"><label>Server *</label><input id="id2" placeholder="Contoh: 1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarML()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
+function beliML(g,i,p){tmp={game:g,item:i,price:p,type:'ml'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>User ID *</label><input id="id1" placeholder="Contoh: 12345678"><label>Server *</label><input id="id2" placeholder="Contoh: 1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarML()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');pushHistory('form');}
 async function goBayarML(){
 const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';
 if(!id1) return alert('User ID wajib!');if(!id2) return alert('Server wajib!');
@@ -172,10 +189,10 @@ let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data sudah benar
 if(!ok) return;
 tmp={...tmp,id1,id2,status:'berjalan',deviceId,username:'guest',createdAt:Date.now()};
 document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>User ID: ${id1}<br>Server: ${id2}`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
+hideAll();document.getElementById('bayar').classList.remove('hidden');pushHistory('bayar');
 try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){console.log(e); alert('Gagal simpan order: '+e.message);}
 }
-function beliPUBG(g,i,p){tmp={game:g,item:i,price:p,type:'pubg'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>PUBG ID *</label><input id="id1" placeholder="Contoh: 5123456789"><button class=btn2 style="background:#ff8fab" onclick=goBayarPUBG()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
+function beliPUBG(g,i,p){tmp={game:g,item:i,price:p,type:'pubg'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>PUBG ID *</label><input id="id1" placeholder="Contoh: 5123456789"><button class=btn2 style="background:#ff8fab" onclick=goBayarPUBG()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');pushHistory('form');}
 async function goBayarPUBG(){
 const id1=document.getElementById('id1')?.value.trim()||'';
 if(!id1) return alert('PUBG ID wajib!');
@@ -183,10 +200,10 @@ let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data sudah benar
 if(!ok) return;
 tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,username:'guest',createdAt:Date.now()};
 document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>PUBG ID: ${id1}`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
+hideAll();document.getElementById('bayar').classList.remove('hidden');pushHistory('bayar');
 try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){alert('Gagal simpan order: '+e.message);}
 }
-function beliValo(g,i,p){tmp={game:g,item:i,price:p,type:'valo'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>Valorant ID *</label><input id="id1" placeholder="Contoh: Nama#1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarValo()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
+function beliValo(g,i,p){tmp={game:g,item:i,price:p,type:'valo'};document.getElementById('fjudul').innerText=g+' - '+i;document.getElementById('formContent').innerHTML=`<label>Valorant ID *</label><input id="id1" placeholder="Contoh: Nama#1234"><button class=btn2 style="background:#ff8fab" onclick=goBayarValo()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');pushHistory('form');}
 async function goBayarValo(){
 const id1=document.getElementById('id1')?.value.trim()||'';
 if(!id1) return alert('Valorant ID wajib!');
@@ -194,10 +211,10 @@ let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data sudah benar
 if(!ok) return;
 tmp={...tmp,id1,id2:'',status:'berjalan',deviceId,username:'guest',createdAt:Date.now()};
 document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Valorant ID: ${id1}`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
+hideAll();document.getElementById('bayar').classList.remove('hidden');pushHistory('bayar');
 try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){alert('Gagal simpan order: '+e.message);}
 }
-function beliRoblox(i,p){tmp={game:'Roblox',item:i,price:p,type:'roblox'};document.getElementById('fjudul').innerText='Roblox - '+i+' (Via Login)';document.getElementById('formContent').innerHTML=`<label>Username: *</label><input id="id1" placeholder="Username Roblox"><label>Password: *</label><div class="pass-wrap"><input id="id2" type="password" placeholder="Password Roblox"><button type="button" id="eyeBtn" class="eye-btn" onclick="togglePass()">👁️</button></div><label>Kode backup yang belum digunakan (minimal 2): *</label><textarea id="id3" rows="5" placeholder="Tempel minimal 2 kode"></textarea><div class="warn" style="border-radius:10px;text-align:left;line-height:1.4">🔐 Via Login Wajib:<br>- Akun harus sudah aktif 2-Step Verification<br>- Minimal 2 kode backup BELUM dipakai</div><button class=btn2 style="background:#ff8fab;color:white" onclick=goBayarRoblox()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');sessionStorage.setItem('rfk-last','form');}
+function beliRoblox(i,p){tmp={game:'Roblox',item:i,price:p,type:'roblox'};document.getElementById('fjudul').innerText='Roblox - '+i+' (Via Login)';document.getElementById('formContent').innerHTML=`<label>Username: *</label><input id="id1" placeholder="Username Roblox"><label>Password: *</label><div class="pass-wrap"><input id="id2" type="password" placeholder="Password Roblox"><button type="button" id="eyeBtn" class="eye-btn" onclick="togglePass()">👁️</button></div><label>Kode backup yang belum digunakan (minimal 2): *</label><textarea id="id3" rows="5" placeholder="Tempel minimal 2 kode"></textarea><div class="warn" style="border-radius:10px;text-align:left;line-height:1.4">🔐 Via Login Wajib:<br>- Akun harus sudah aktif 2-Step Verification<br>- Minimal 2 kode backup BELUM dipakai</div><button class=btn2 style="background:#ff8fab;color:white" onclick=goBayarRoblox()>Lanjut Pilih Chat 💬</button><button class=btn-batal onclick=batal()>❌ Batal - Pilih Lain</button>`;hideAll();document.getElementById('form').classList.remove('hidden');pushHistory('form');}
 async function goBayarRoblox(){
 const id1=document.getElementById('id1')?.value.trim()||'';const id2=document.getElementById('id2')?.value.trim()||'';const id3=document.getElementById('id3')?.value.trim()||'';
 if(!id1) return alert('Username wajib!');if(!id2) return alert('Password wajib!');if(!id3) return alert('Kode backup wajib minimal 2!');
@@ -206,61 +223,22 @@ let ok = confirm(`⚠️ RFK STORE - CEK DATA DULU!\n\nPastikan data Roblox suda
 if(!ok) return;
 tmp={...tmp,id1,id2,id3,status:'berjalan',deviceId,username:'guest',createdAt:Date.now(),codeCount:codes.length};
 document.getElementById('bayarInfo').innerHTML=`<b>${tmp.game} - ${tmp.item}</b><br>Rp ${tmp.price}<br>Username: ${id1}<br>Kode: ${codes.length} kode valid`;
-hideAll();document.getElementById('bayar').classList.remove('hidden');sessionStorage.setItem('rfk-last','bayar');
+hideAll();document.getElementById('bayar').classList.remove('hidden');pushHistory('bayar');
 try{await window.fs.addDoc(window.fs.collection(window.db,'orders'),tmp);}catch(e){alert('Gagal simpan order: '+e.message);}
 }
 function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUser ID: ${tmp.id1}\nServer: ${tmp.id2}`;if(tmp.type==='pubg') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nPUBG ID: ${tmp.id1}`;if(tmp.type==='valo') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nValorant ID: ${tmp.id1}`;if(tmp.type==='roblox') return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nUsername: ${tmp.id1}\nPassword: ${tmp.id2}\nKode Backup (${tmp.codeCount||2} kode): ${tmp.id3}`;return `Halo RFK STORE 👋\nMau pesan ${tmp.game} ${tmp.item} Rp ${tmp.price}\nID: ${tmp.id1} ${tmp.id2||''} ${tmp.id3||''}`;}
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
-let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput.star').forEach((s,i)=>{s.classList.toggle('active',i<n);});}setStar(5);
+let selectedStar=5;function setStar(n){selectedStar=n;document.querySelectorAll('#starInput.star').forEach((s,i)=>{let el=s; el.classList.toggle('active',i<n);});}
+function initStars(){document.querySelectorAll('#starInput.star').forEach((s,i)=>s.classList.toggle('active',i<5));}
+initStars();
 async function kirimUlasan(){let nama=document.getElementById('namaUlasan').value||'Anonim';let komen=document.getElementById('komentarUlasan').value;if(!komen) return alert('Tulis komentar dulu!');await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{nama:nama,komentar:komen,bintang:selectedStar,createdAt:Date.now()});document.getElementById('komentarUlasan').value='';alert('Makasih ulasannya! ⭐');}
 
-// ====== SYNC HARGA FINAL V3 - ANTI BALIK NORMAL ======
 const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-let savedMap = {};
-try{ savedMap = JSON.parse(localStorage.getItem('rfk-prices')||'{}'); }catch(e){}
-function applyPrices(map){
-  if(!map || Object.keys(map).length===0) return;
-  document.querySelectorAll('.price').forEach(el=>{
-    let oc = el.getAttribute('onclick')||'';
-    let m = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'/);
-    let itemRaw = '';
-    if(m) itemRaw = m[2];
-    else {
-      let m2 = oc.match(/'([^']+)'\s*,\s*'([^']+)'/);
-      if(m2) itemRaw = m2[1];
-    }
-    if(!itemRaw) return;
-    let key = norm(itemRaw);
-    let hargaBaru = map[key];
-    if(hargaBaru){
-      let b = el.querySelector('b');
-      if(b) b.innerText='Rp '+Number(hargaBaru).toLocaleString('id-ID');
-      el.setAttribute('onclick', oc.replace(/,'[^']+'\)\s*$/, `,'${hargaBaru}')`));
-    }
-  });
-}
+let savedMap = {};try{ savedMap = JSON.parse(localStorage.getItem('rfk-prices')||'{}'); }catch(e){}
+function applyPrices(map){if(!map || Object.keys(map).length===0) return;document.querySelectorAll('.price').forEach(el=>{let oc = el.getAttribute('onclick')||'';let m = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'/);let itemRaw = '';if(m) itemRaw = m[2];else {let m2 = oc.match(/'([^']+)'\s*,\s*'([^']+)'/);if(m2) itemRaw = m2[1];}if(!itemRaw) return;let key = norm(itemRaw);let hargaBaru = map[key];if(hargaBaru){let b = el.querySelector('b');if(b) b.innerText='Rp '+Number(hargaBaru).toLocaleString('id-ID');el.setAttribute('onclick', oc.replace(/,'[^']+'\)\s*$/, `,'${hargaBaru}')`));}});}
 applyPrices(savedMap);
-function startSync(){
-  if(!window.fs ||!window.fs.collection){ setTimeout(startSync,300); return; }
-  try{
-    const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
-    window.fs.onSnapshot(qHarga, snap=>{
-      const map={};
-      snap.forEach(d=>{
-        let p=d.data();
-        if(!p.item ||!p.price) return;
-        map[norm(p.item)] = p.price;
-        map[norm(p.game+' '+p.item)] = p.price;
-      });
-      if(Object.keys(map).length>0){
-        localStorage.setItem('rfk-prices', JSON.stringify(map));
-        applyPrices(map);
-      }
-    });
-  }catch(e){ setTimeout(startSync,500); }
-}
-startSync();
+function startSync(){if(!window.fs ||!window.fs.collection){ setTimeout(startSync,300); return; }try{const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));window.fs.onSnapshot(qHarga, snap=>{const map={};snap.forEach(d=>{let p=d.data();if(!p.item ||!p.price) return;map[norm(p.item)] = p.price;map[norm(p.game+' '+p.item)] = p.price;});if(Object.keys(map).length>0){localStorage.setItem('rfk-prices', JSON.stringify(map));applyPrices(map);}});}catch(e){ setTimeout(startSync,500); }}startSync();
 
 setTimeout(()=>{try{
 const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));
@@ -271,7 +249,20 @@ window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=
 
 async function selesaiPesanan(id){if(!isAdmin)return;await window.fs.updateDoc(window.fs.doc(window.db,'orders',id),{status:'selesai'});}
 const toggle=document.getElementById('theme-toggle');const saved=localStorage.getItem('rfk-theme');if(saved==='dark'){document.documentElement.setAttribute('data-theme','dark');toggle.textContent='☀️';}toggle.addEventListener('click',()=>{const isD=document.documentElement.getAttribute('data-theme')==='dark';if(isD){document.documentElement.removeAttribute('data-theme');localStorage.setItem('rfk-theme','light');toggle.textContent='🌙';}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('rfk-theme','dark');toggle.textContent='☀️';}});
-window.addEventListener('DOMContentLoaded',()=>{let last = sessionStorage.getItem('rfk-last');if(last && document.getElementById(last)){hideAll();document.getElementById(last).classList.remove('hidden');if(last!=='home'){lastGame=last;}showTab(last);} else {showTab('home');}});
+window.addEventListener('DOMContentLoaded',()=>{
+  let hash = location.hash.replace('#','');
+  let last = hash || sessionStorage.getItem('rfk-last') || 'home';
+  if(last && document.getElementById(last)){
+    hideAll();
+    document.getElementById(last).classList.remove('hidden');
+    if(last!=='home') lastGame=last;
+    showTab(last);
+    if(!hash) history.replaceState({page:last}, '', '#'+last);
+  } else {
+    showTab('home');
+    history.replaceState({page:'home'}, '', '#home');
+  }
+});
 </script>
 </body>
 </html>
