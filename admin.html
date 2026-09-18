@@ -39,7 +39,6 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div class="card">
 <input id="email" placeholder="Email Admin">
 <input id="pw" type="password" placeholder="Password">
-<input id="pin" type="password" placeholder="PIN">
 <button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
 <div id="loginMsg" style="color:#ff8fab;margin-top:8px"></div>
 </div>
@@ -87,12 +86,7 @@ valorant:["475 Points","1000 Points","1475 Points","2050 Points","2525 Points","
 function normGame(g){let s=(g||'').toLowerCase();if(s.includes('ml')||s.includes('mobile')||s.includes('legend'))return'ml';if(s.includes('pubg'))return'pubg';if(s.includes('roblox')||s.includes('robux'))return'roblox';if(s.includes('valo'))return'valorant';return'other';}
 function bulatCantik(n){if(n<=0)return n;let base=Math.floor(n/1000)*1000;let sisa=n%1000;if(sisa===0)return n;if(sisa<=500)return base+500;return base+1000;}
 function initSelects(){let g=document.getElementById('p_game');g.innerHTML='<option value="">Pilih Game</option><option value="ml">ML</option><option value="pubg">PUBG</option><option value="roblox">Roblox</option><option value="valorant">Valorant</option>';onGameChange();}
-
-// === FITUR REFRESH KAYA WEB PEMBELI ===
-function pushHistoryAdmin(page){
-  try{history.pushState({page:page},'', '#'+page);}catch(e){}
-  sessionStorage.setItem('rfk-admin-last',page);
-}
+function pushHistoryAdmin(page){try{history.pushState({page:page},'', '#'+page);}catch(e){}sessionStorage.setItem('rfk-admin-last',page);}
 window.addEventListener('popstate',(e)=>{
   let page=e.state?.page||location.hash.replace('#','')||sessionStorage.getItem('rfk-admin-last')||'all';
   if(['all','ml','pubg','roblox','valorant'].includes(page)){
@@ -104,7 +98,6 @@ window.addEventListener('popstate',(e)=>{
     onGameChange(); render(); renderHarga();
   }
 });
-
 function onGameChange(){let g=document.getElementById('p_game').value;let sel=document.getElementById('p_item');if(!g){sel.innerHTML='<option>Pilih Game Dulu</option>';return;}let list=ITEMS[g]||[];let custom=allPrices.filter(p=>normGame(p.game)===g).map(p=>p.item);let merged=[...new Set([...list,...custom])];sel.innerHTML='<option value="">Pilih Item</option>'+merged.map(it=>`<option value="${it}">${it}</option>`).join('')+'<option value="__custom">+ Baru</option>';hitung();}
 function setPersen(p){curPersen=p;document.getElementById('p_persen').value=p;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');hitung();}
 function hitungCustom(){curPersen=Number(document.getElementById('p_persen').value)||0;document.querySelectorAll('.btn-small').forEach(b=>b.classList.remove('active'));hitung();}
@@ -113,13 +106,8 @@ function hitung(){let el=document.getElementById('p_item');if(el.value==='__cust
 async function login(){
   let email=document.getElementById('email').value.trim();
   let pw=document.getElementById('pw').value;
-  let pin=document.getElementById('pin').value;
   let msg=document.getElementById('loginMsg');
-  if(!email||!pw||!pin) return msg.innerText='Login gagal, cek data!';
-  if(pin!=='042326'){
-    // JANGAN KASIH TAU PIN SALAH
-    return msg.innerText='Login gagal!';
-  }
+  if(!email||!pw) return msg.innerText='Login gagal, cek data!';
   try{
     msg.innerText='Login...';
     let cred=await window.fs.signInWithEmailAndPassword(window.auth,email,pw);
@@ -131,6 +119,7 @@ async function login(){
     load();
   }catch(e){msg.innerText='Login gagal!';}
 }
+
 window.fs.onAuthStateChanged(window.auth,(user)=>{
   if(user){
     if(localStorage.getItem('rfk-admin')==='true'){
@@ -138,7 +127,6 @@ window.fs.onAuthStateChanged(window.auth,(user)=>{
       document.getElementById('dash').classList.remove('hidden');
       document.getElementById('adminEmail').innerText=user.email;
       load();
-      // RESTORE TAB TERAKHIR PAS REFRESH
       let last=location.hash.replace('#','')||sessionStorage.getItem('rfk-admin-last')||'all';
       if(['all','ml','pubg','roblox','valorant'].includes(last)){
         setTimeout(()=>{setGame(last);},200);
