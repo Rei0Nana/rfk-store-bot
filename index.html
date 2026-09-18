@@ -199,7 +199,7 @@ function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan $
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
 
-// BINTANG NYALA LANGSUNG
+// BINTANG NYALA LANGSUNG - FIX
 let selectedStar = 0;
 function setStar(n){
   selectedStar = n;
@@ -208,18 +208,12 @@ function setStar(n){
   });
 }
 
-function sensorText(nama){
-  if(!nama || nama.length <= 1) return "***";
-  return nama[0] + "***";
-}
-
 async function kirimUlasan(){
   if(selectedStar===0) return alert('Pilih bintang dulu! ⭐');
   let nama=document.getElementById('namaUlasan').value||'Anonim';
   let komen=document.getElementById('komentarUlasan').value;
   if(!komen) return alert('Tulis komentar dulu!');
   let isSensor = document.getElementById('sensorNama').checked;
-
   await window.fs.addDoc(window.fs.collection(window.db,'reviews'),{
     nama:nama,
     komentar:komen,
@@ -233,7 +227,6 @@ async function kirimUlasan(){
   selectedStar=0;
   document.querySelectorAll('#starInput.star').forEach(s=>s.classList.remove('active'));
   alert('Makasih ulasannya! ⭐');
-}ulasannya! ⭐');
 }
 
 // FIX HARGA ADMIN
