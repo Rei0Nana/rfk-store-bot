@@ -233,10 +233,6 @@ function applyPrices(map){
     if(!itemRaw) return;
     let key = norm(itemRaw);
     let hargaBaru = map[key];
-    if(!hargaBaru){
-      let found = Object.keys(map).find(k=> k.length>4 && (key===k || key.includes(k) || k.includes(key)));
-      if(found) hargaBaru = map[found];
-    }
     if(hargaBaru){
       let b = el.querySelector('b');
       if(b) b.innerText='Rp '+Number(hargaBaru).toLocaleString('id-ID');
