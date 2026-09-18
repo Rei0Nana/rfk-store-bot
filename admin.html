@@ -38,7 +38,7 @@ window.fs={collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc, query, ord
 <div id="login" class="hidden">
 <h2>🔐 LOGIN ADMIN</h2>
 <div class="card">
-<input id="email" placeholder="Email Admin" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
+<input id="email" placeholder="Email Admin" type="text" autocomplete="off">
 <input id="pw" type="password" placeholder="Password" autocomplete="new-password">
 <button class="btn btn-pink" onclick="login()">Masuk Dashboard</button>
 <div id="loginMsg" style="color:#ff8fab;margin-top:8px"></div>
@@ -121,25 +121,50 @@ async function login(){
   }catch(e){msg.innerText='Login gagal!';}
 }
 
-window.fs.onAuthStateChanged(window.auth,(user)=>{
+let authChecked=false;
+function showDash(user){
+  if(authChecked) return;
+  authChecked=true;
   let loading=document.getElementById('loading');
-  if(loading) loading.remove();
-  if(user && localStorage.getItem('rfk-admin')==='true'){
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
-    document.getElementById('adminEmail').innerText=user.email;
-    load();
-    let last=location.hash.replace('#','')||sessionStorage.getItem('rfk-admin-last')||'all';
-    if(['all','ml','pubg','roblox','valorant'].includes(last)){
-      setTimeout(()=>{setGame(last);},200);
-    }
+  if(loading) loading.style.display='none';
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('adminEmail').innerText=user.email;
+  localStorage.setItem('rfk-admin','true');
+  load();
+  let last=location.hash.replace('#','')||sessionStorage.getItem('rfk-admin-last')||'all';
+  if(['all','ml','pubg','roblox','valorant'].includes(last)){
+    setTimeout(()=>{setGame(last);},200);
+  }
+}
+function showLogin(){
+  if(authChecked) return;
+  authChecked=true;
+  let loading=document.getElementById('loading');
+  if(loading) loading.style.display='none';
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('dash').classList.add('hidden');
+  document.getElementById('email').value='';
+  document.getElementById('pw').value='';
+}
+
+window.fs.onAuthStateChanged(window.auth,(user)=>{
+  if(user){
+    showDash(user);
   }else{
-    document.getElementById('login').classList.remove('hidden');
-    document.getElementById('dash').classList.add('hidden');
-    document.getElementById('email').value='';
-    document.getElementById('pw').value='';
+    showLogin();
   }
 });
+
+// ANTI STUCK - kalau 3 detik firebase gak respon, paksa tampil login
+setTimeout(()=>{
+  if(!authChecked){
+    let loading=document.getElementById('loading');
+    if(loading) loading.style.display='none';
+    document.getElementById('login').classList.remove('hidden');
+  }
+},3000);
+
 function logout(){window.fs.signOut(window.auth);localStorage.removeItem('rfk-admin');sessionStorage.removeItem('rfk-admin-last');location.reload();}
 function load(){const q=window.fs.query(window.fs.collection(window.db,'orders'),window.fs.orderBy('createdAt','desc'));window.fs.onSnapshot(q,s=>{allData=[];s.forEach(d=>{allData.push({id:d.id,...d.data()})});render();});loadHarga();initSelects();}
 function setGame(g){curGame=g;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelector(`.tab[data-game="${g}"]`).classList.add('active');document.getElementById('p_game').value=g==='all'?'':g;pushHistoryAdmin(g);onGameChange();render();renderHarga();}
