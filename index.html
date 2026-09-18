@@ -161,7 +161,6 @@ window.db=db; window.fs={collection, addDoc, onSnapshot, doc, updateDoc, query, 
 <span class="star" onclick="setStar(3)">★</span>
 <span class="star" onclick="setStar(4)">★</span>
 <span class="star" onclick="setStar(5)">★</span>
-<div id="starLabel" style="margin-top:6px;font-size:12px;color:#888">Pilih bintang dulu</div>
 </div>
 <input id="namaUlasan" placeholder="Nama kamu">
 <textarea id="komentarUlasan" placeholder="Tulis pengalaman kamu..." rows="3"></textarea>
@@ -196,15 +195,13 @@ function getPesan(){if(tmp.type==='ml') return `Halo RFK STORE 👋\nMau pesan $
 function konfirmWA(){let msg=getPesan();window.open('https://wa.me/6285333403905?text='+encodeURIComponent(msg),'_blank');showTab('pesanan');}
 function konfirmDiscord(){let msg=getPesan();navigator.clipboard.writeText(msg).then(()=>{alert('Pesan pesanan udah gue copy! Tinggal paste di Discord ya!');}).catch(()=>{});window.open('https://discordapp.com/users/1546094614908239972','_blank');showTab('pesanan');}
 
-// ===== FIX FINAL BINTANG + LABEL =====
+// FIX BINTANG NYALA LANGSUNG - GAK PAKE TULISAN
 let selectedStar = 0;
 function setStar(n){
   selectedStar = n;
-  document.querySelectorAll('#starInput.star').forEach((s,i)=>{
+  document.querySelectorAll('#starInput .star').forEach((s,i)=>{
     s.classList.toggle('active', i < n);
   });
-  let label = document.getElementById('starLabel');
-  if(label) label.innerText = n + '/5 bintang dipilih ⭐';
 }
 
 async function kirimUlasan(){
@@ -216,8 +213,7 @@ async function kirimUlasan(){
   document.getElementById('komentarUlasan').value='';
   document.getElementById('namaUlasan').value='';
   selectedStar=0;
-  document.querySelectorAll('#starInput.star').forEach(s=>s.classList.remove('active'));
-  document.getElementById('starLabel').innerText='Pilih bintang dulu';
+  document.querySelectorAll('#starInput .star').forEach(s=>s.classList.remove('active'));
   alert('Makasih ulasannya! ⭐');
 }
 
