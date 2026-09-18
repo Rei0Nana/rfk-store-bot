@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RFK STORE</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
 *{box-sizing:border-box}
 :root{--bg:#fff0f5;--card:white;--text:#4a2a3a;--pink:#ff8fab;--border:#ffe0ec;--nav:white;--shadow:#ffd6e3;--kimg:white}
@@ -222,42 +225,36 @@ window.fs.onSnapshot(q,s=>{let b='',seles='';s.forEach(d=>{let o=d.data();let id
 const q2=window.fs.query(window.fs.collection(window.db,'reviews'),window.fs.orderBy('createdAt','desc'));
 window.fs.onSnapshot(q2,s=>{let html='';let total=0,count=0;s.forEach(d=>{let r=d.data();total+=r.bintang;count++;let stars='★'.repeat(r.bintang)+'☆'.repeat(5-r.bintang);let t=r.createdAt?new Date(r.createdAt).toLocaleDateString('id-ID'):'';html+=`<div class=review-card><b>${r.nama}</b> <span style="color:#ffc107">${stars}</span><br><small style="color:#888">${t}</small><br><div style="margin-top:4px">${r.komentar}</div></div>`;});document.getElementById('listUlasan').innerHTML=html||'<small>Belum ada ulasan</small>';if(count>0){let avg=(total/count).toFixed(1);document.getElementById('avgRating').innerText=avg;document.getElementById('avgStars').innerText='★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg));document.getElementById('totalUlasan').innerText=count+' ulasan';}});
 
-// ===== FITUR BARU: SYNC HARGA DARI ADMIN - GAK UBAH YANG LAIN =====
+// ===== FIX SYNC HARGA - ANTI CACHE & ANTI BUG - 100% BARU =====
+const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const qHarga = window.fs.query(window.fs.collection(window.db,'prices'));
 window.fs.onSnapshot(qHarga, snap=>{
   const map={};
   snap.forEach(d=>{
     let p=d.data();
-    // key normal: game + item lower
-    let k1 = (p.game+'_'+p.item).toLowerCase().replace(/\s+/g,'_');
-    let k2 = p.item.toLowerCase().trim();
-    map[k1]=p.price;
-    map[k2]=p.price;
+    map[norm(p.item)] = p.price;
+    map[norm(p.game+' '+p.item)] = p.price;
   });
   document.querySelectorAll('.price').forEach(el=>{
     let oc = el.getAttribute('onclick')||'';
-    // ambil item dari onclick: 'ML','Weekly Diamond Pass (Event Topup +100)','33657'
     let m = oc.match(/'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'/);
-    if(!m){
-      // untuk roblox: '500 Robux','82500'
-      m = oc.match(/'([^']+)'\s*,\s*'([^']+)'/);
-      if(m){
-        let item = m[1].toLowerCase().trim();
-        let key = Object.keys(map).find(k=>k===item || item.includes(k) || k.includes(item));
-        if(key && map[key]){
-          let np = map[key];
-          let b = el.querySelector('b'); if(b) b.innerText='Rp '+Number(np).toLocaleString('id-ID');
-          el.setAttribute('onclick', oc.replace(/'[^']+'\)$/, `'${np}')`));
-        }
-      }
-      return;
+    let itemRaw = '';
+    if(m) itemRaw = m[2];
+    else {
+      let m2 = oc.match(/'([^']+)'\s*,\s*'([^']+)'/);
+      if(m2) itemRaw = m2[1];
     }
-    let item = m[2].toLowerCase().trim();
-    let full = (m[1]+'_'+m[2]).toLowerCase().replace(/\s+/g,'_');
-    let priceBaru = map[full] || map[item] || Object.keys(map).find(k=>item.includes(k) || k.includes(item)) ? map[Object.keys(map).find(k=>item.includes(k) || k.includes(item))] : null;
-    if(priceBaru){
-      let b = el.querySelector('b'); if(b) b.innerText='Rp '+Number(priceBaru).toLocaleString('id-ID');
-      el.setAttribute('onclick', oc.replace(/,'[^']+'\)$/, `,'${priceBaru}')`));
+    if(!itemRaw) return;
+    let key = norm(itemRaw);
+    let hargaBaru = map[key];
+    if(!hargaBaru){
+      let found = Object.keys(map).find(k=> key.includes(k) || k.includes(key));
+      if(found) hargaBaru = map[found];
+    }
+    if(hargaBaru){
+      let b = el.querySelector('b');
+      if(b) b.innerText='Rp '+Number(hargaBaru).toLocaleString('id-ID');
+      el.setAttribute('onclick', oc.replace(/,'[^']+'\)\s*$/, `,'${hargaBaru}')`));
     }
   });
 });
